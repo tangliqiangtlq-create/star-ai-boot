@@ -1,0 +1,85 @@
+import {defHttp} from "/@/utils/http/axios";
+import { useMessage } from "/@/hooks/web/useMessage";
+
+const { createConfirm } = useMessage();
+
+enum Api {
+  list = '/${entityPackage}/${entityName?uncap_first}/rootList',
+  save='/${entityPackage}/${entityName?uncap_first}/add',
+  edit='/${entityPackage}/${entityName?uncap_first}/edit',
+  delete${entityName} = '/${entityPackage}/${entityName?uncap_first}/delete',
+  importExcel = '/${entityPackage}/${entityName?uncap_first}/importExcel',
+  exportXls = '/${entityPackage}/${entityName?uncap_first}/exportXls',
+  loadTreeData = '/${entityPackage}/${entityName?uncap_first}/loadTreeRoot',
+  getChildList = '/${entityPackage}/${entityName?uncap_first}/childList',
+  getChildListBatch = '/${entityPackage}/${entityName?uncap_first}/getChildListBatch',
+}
+
+/**
+ * Export API
+ * @param params
+ */
+export const getExportUrl = Api.exportXls;
+/**
+ * Import API
+ * @param params
+ */
+export const getImportUrl = Api.importExcel;
+/**
+ * List API
+ * @param params
+ */
+export const list = (params) =>
+  defHttp.get({url: Api.list, params});
+/**
+ * Delete
+ */
+export const delete${entityName} = (params,handleSuccess) => {
+  return defHttp.delete({url: Api.delete${entityName}, params}, {joinParamsToUrl: true}).then(() => {
+    handleSuccess();
+  });
+}
+/**
+ * Batch delete
+ * @param params
+ */
+export const batchDelete${entityName} = (params, handleSuccess) => {
+  createConfirm({
+    iconType: 'warning',
+    title: 'ConfirmDelete',
+    content: 'Delete selected data?',
+    okText: 'Confirm',
+    cancelText: 'Cancel',
+    onOk: () => {
+      return defHttp.delete({url: Api.delete${entityName}, data: params}, {joinParamsToUrl: true}).then(() => {
+        handleSuccess();
+      });
+    }
+  });
+}
+/**
+ * Save or update
+ * @param params
+ */
+export const saveOrUpdateDict = (params, isUpdate) => {
+  let url = isUpdate ? Api.edit : Api.save;
+  return defHttp.post({url: url, params});
+}
+/**
+ * Query all tree node data
+ * @param params
+ */
+export const loadTreeData = (params) =>
+  defHttp.get({url: Api.loadTreeData,params});
+/**
+ * Query child node data
+ * @param params
+ */
+export const getChildList = (params) =>
+  defHttp.get({url: Api.getChildList, params});
+/**
+ * Batch query child node data
+ * @param params
+ */
+export const getChildListBatch = (params) =>
+  defHttp.get({url: Api.getChildListBatch, params},{isTransformResponse:false});

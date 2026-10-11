@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>jeecg-server-cloud</artifactId>
+    <groupId>org.jeecgframework.boot</groupId>
+    <version>3.7.0</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>star-ai-system-cloud-start</artifactId>
+  <description>System microservice bootstrap</description>
+
+  <dependencies>
+    <!--Tomcat annotations-api passed before rocketmq to avoid loading incomplete javax.annotation.Resource when Spring 6 handles @Resource-->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>javax.annotation-api</artifactId>
+      <version>1.3.2</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.websocket</groupId>
+      <artifactId>javax.websocket-api</artifactId>
+      <version>1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>${druid.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.xkcoding.justauth</groupId>
+      <artifactId>justauth-spring-boot-starter</artifactId>
+      <version>${justauth-spring-boot-starter.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <!-- Explicit base-core dependency so IDEA module classpath always resolves IpUtils/oConvertUtils at runtime -->
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>star-ai-boot-base-core</artifactId>
+    </dependency>
+    <!--Introduce jeecg-boot-starter-cloud dependency-->
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>jeecg-boot-starter-cloud</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.jeecgframework.boot</groupId>
+          <artifactId>jeecg-boot-starter-job</artifactId>
+        </exclusion>
+      </exclusions>
+      <!--After version 3.2, you can choose whether to exclude star-ai-system-cloud-api. If not excluded, the interface will be called through fegin first.
+<exclusions>
+<exclusion>
+<groupId>org.jeecgframework.boot</groupId>
+<artifactId>star-ai-system-cloud-api</artifactId>
+</exclusion>
+</exclusions>-->
+    </dependency>
+    <!--star-ai-system-biz dependency-->
+    <!-- Spring 6.x requires mybatis-spring 3.x; override transitive 2.1.1 from old mybatis-plus starter -->
+    <dependency>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis-spring</artifactId>
+      <version>3.0.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>star-ai-system-biz</artifactId>
+      <!--Exclude the demo module. The demo module is started independently using microservices.-->
+      <exclusions>
+        <exclusion>
+          <groupId>org.jeecgframework.boot</groupId>
+          <artifactId>jeecg-module-demo</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jeecgframework.boot</groupId>
+          <artifactId>jeecg-boot-starter-job</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.jeecgframework.jimureport</groupId>
+          <artifactId>jimureport-spring-boot-starter</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!--Real scenario IT: Connect Nacos/development library to run KYC status and template matching-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+      <exclusions>
+        <!--Someone in the warehouse locked spring-test to 5.3.x, which will cause AotTestAttributes CNF-->
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-test</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>${spring-framework.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+
+
+
+    <!--feign fuse current limiting, distributed lock, xxljob examples
+<dependency>
+<groupId>org.jeecgframework.boot</groupId>
+<artifactId>jeecg-cloud-test-more</artifactId>
+<version>${jeecgboot.version}</version>
+</dependency>-->
+    <!--rabbitmq example
+<dependency>
+<groupId>org.jeecgframework.boot</groupId>
+<artifactId>jeecg-cloud-test-rabbitmq</artifactId>
+<version>${jeecgboot.version}</version>
+</dependency>-->
+    <!--rocketmq example-->
+    <!--<dependency>
+        <groupId>org.jeecgframework.boot</groupId>
+        <artifactId>jeecg-cloud-test-rocketmq</artifactId>
+        <version>${jeecgboot.version}</version>
+    </dependency>-->
+    <!--Distributed transaction example
+<dependency>
+<groupId>org.jeecgframework.boot</groupId>
+<artifactId>jeecg-cloud-test-seata</artifactId>
+<version>${jeecgboot.version}</version>
+</dependency>-->
+    <!--Example of sub-database and sub-table
+<dependency>
+<groupId>org.jeecgframework.boot</groupId>
+<artifactId>jeecg-cloud-test-shardingsphere</artifactId>
+<version>${jeecgboot.version}</version>
+</dependency>-->
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <!--3.3+: Use argfile for spring-boot:run under Windows to avoid CreateProcess error=206 caused by excessive classpath-->
+        <version>3.3.13</version>
+        <configuration>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+          <excludes>
+            <exclude>
+              <groupId>org.apache.tomcat</groupId>
+              <artifactId>annotations-api</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

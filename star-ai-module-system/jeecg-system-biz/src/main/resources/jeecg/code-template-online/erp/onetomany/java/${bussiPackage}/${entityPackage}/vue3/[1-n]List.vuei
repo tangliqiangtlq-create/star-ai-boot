@@ -1,0 +1,188 @@
+<#list subTables as sub>
+#segment#${sub.entityName}List.vue
+<template>
+ <div>
+     <!--Reference table-->
+    <BasicTable @register="registerTable" :rowSelection="rowSelection" :searchInfo="searchInfo">
+      <!--Slot: table title-->
+       <template #tableTitle>
+           <a-button type="primary" @click="handleCreate" preIcon="ant-design:plus-outlined" v-if="mainId!=''"> Add</a-button>
+           <a-button  type="primary" preIcon="ant-design:export-outlined" @click="onExportXls" v-if="mainId!=''"> Export</a-button>
+           <j-upload-button  type="primary" preIcon="ant-design:import-outlined" @click="onImportXls" v-if="mainId!=''">Import</j-upload-button>
+           <a-dropdown v-if="selectedRowKeys.length > 0">
+               <template #overlay>
+                 <a-menu>
+                   <a-menu-item key="1" @click="batchHandleDelete">
+                     <Icon icon="ant-design:delete-outlined"></Icon>
+                     Delete
+                   </a-menu-item>
+                 </a-menu>
+               </template>
+               <a-button>Batch actions
+                 <Icon icon="mdi:chevron-down"></Icon>
+               </a-button>
+         </a-dropdown>
+       </template>
+        <!--Action column-->
+       <template #action="{ record }">
+         <TableAction :actions="getTableAction(record)"/>
+       </template>
+       <!--Field display slot-->
+       <template v-slot:bodyCell="{ column, record, index, text }">
+       <#list sub.originalColumns as po>
+         <#if po.classType=='umeditor' || po.classType=='pca' || po.classType=='file'>
+         <template v-if="column.dataIndex==='${po.fieldName}'">
+         <#if po.classType=='umeditor'>
+           <!--Rich text field display slot-->
+           <div v-html="text"></div>
+         </#if>
+         <#if po.classType=='file'>
+           <!--File field display slot-->
+           <span v-if="!text" style="font-size: 12px;font-style: italic;">No file</span>
+           <a-button v-else :ghost="true" type="primary" preIcon="ant-design:download-outlined" size="small" @click="downloadFile(text)">Download</a-button>
+         </#if>
+         </template>
+        </#if>
+       </#list>
+       </template>
+     </BasicTable>
+
+      <${sub.entityName}Modal @register="registerModal" @success="handleSuccess"/>
+   </div>
+</template>
+
+<script lang="ts" setup>
+  import {ref, computed, unref,inject,watch} from 'vue';
+  import {BasicTable, useTable, TableAction} from '/@/components/Table';
+  import { useListPage } from '/@/hooks/system/useListPage'
+  import {useModal} from '/@/components/Modal';
+  import ${sub.entityName}Modal from './components/${sub.entityName}Modal.vue'
+  import {${sub.entityName?uncap_first}Columns} from './${entityName}.data';
+  import {${sub.entityName?uncap_first}List, ${sub.entityName?uncap_first}Delete, ${sub.entityName?uncap_first}DeleteBatch, ${sub.entityName?uncap_first}ExportXlsUrl, ${sub.entityName?uncap_first}ImportUrl } from './${entityName}.api';
+  import {isEmpty} from "/@/utils/is";
+  import {useMessage} from '/@/hooks/web/useMessage';
+  import {downloadFile} from '/@/utils/common/renderUtils';
+
+    //Receive main table id
+    const mainId = inject('mainId') || '';
+    //Confirm dialog
+    const $message = useMessage()
+    //Modal model
+    const [registerModal, {openModal}] = useModal();
+    const searchInfo = {};
+    // Shared list page params and methods
+    const {prefixCls, tableContext, onImportXls, onExportXls} = useListPage({
+        tableProps: {
+            api: ${sub.entityName?uncap_first}List,
+            columns: ${sub.entityName?uncap_first}Columns,
+            canResize: false,
+            useSearchForm: false,
+            actionColumn: {
+                width: 180,
+            },
+            pagination:{
+                current: 1,
+                pageSize: 5,
+                pageSizeOptions: ['5', '10', '20'],
+            }
+        },
+        exportConfig: {
+            name: '${sub.ftlDescription}',
+            url: ${sub.entityName?uncap_first}ExportXlsUrl,
+            params: {
+                <#list sub.foreignKeys as key>
+                '${key?uncap_first}': mainId
+                </#list>
+            }
+        },
+        importConfig: {
+            url: ()=>{
+                return ${sub.entityName?uncap_first}ImportUrl + '/' + unref(mainId)
+            }
+        }
+    });
+
+    //Register table data
+    const [registerTable, {reload<#if sub.foreignRelationType =='1'>,getDataSource</#if>}, {rowSelection, selectedRowKeys}] = tableContext;
+
+    watch(mainId, () => {
+     <#list sub.foreignKeys as key>
+         searchInfo['${key?uncap_first}'] = unref(mainId);
+     </#list>
+         reload();
+      }
+    );
+
+    /**
+     * Add handler
+     */
+    function handleCreate() {
+        if (isEmpty(unref(mainId))) {
+            $message.createMessage.warning('Please select a main record')
+            return;
+        }
+        <#if sub.foreignRelationType =='1'>
+        let dataSource = getDataSource();
+        if(dataSource.length  >=  1){
+            $message.createMessage.warning('Only one row can be added to a one-to-one sub-table')
+            return;
+        }
+        </#if>
+        openModal(true, {
+            isUpdate: false,
+            showFooter: true,
+        });
+    }
+
+    /**
+     * Edit handler
+     */
+    async function handleEdit(record: Recordable) {
+        openModal(true, {
+            record,
+            isUpdate: true,
+            showFooter: true,
+        });
+    }
+
+    /**
+     * Delete handler
+     */
+    async function handleDelete(record) {
+        await ${sub.entityName?uncap_first}Delete({id: record.id}, handleSuccess);
+    }
+
+    /**
+     * Batch delete handler
+     */
+    async function batchHandleDelete() {
+        await ${sub.entityName?uncap_first}DeleteBatch({ids: selectedRowKeys.value}, handleSuccess)
+    }
+
+    /**
+     * Success callback
+     */
+    function handleSuccess() {
+        (selectedRowKeys.value = []) && reload();
+    }
+
+    /**
+     * Action column
+     */
+    function getTableAction(record) {
+        return [
+            {
+                label: 'Edit',
+                onClick: handleEdit.bind(null, record),
+            }, {
+                label: 'Delete',
+                popConfirm: {
+                    title: 'Confirm delete?',
+                    confirm: handleDelete.bind(null, record),
+                    placement: 'topLeft',
+                },
+            }
+        ]
+    }
+</script>
+</#list>

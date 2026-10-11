@@ -1,0 +1,83 @@
+import {defHttp} from '/@/utils/http/axios';
+import { useMessage } from "/@/hooks/web/useMessage";
+
+const { createConfirm } = useMessage();
+
+enum Api {
+  list = '/${entityPackage}/${entityName?uncap_first}/list',
+  save='/${entityPackage}/${entityName?uncap_first}/add',
+  edit='/${entityPackage}/${entityName?uncap_first}/edit',
+  deleteOne = '/${entityPackage}/${entityName?uncap_first}/delete',
+  deleteBatch = '/${entityPackage}/${entityName?uncap_first}/deleteBatch',
+  importExcel = '/${entityPackage}/${entityName?uncap_first}/importExcel',
+  exportXls = '/${entityPackage}/${entityName?uncap_first}/exportXls',
+<#list subTables as sub><#rt/>
+  ${sub.entityName?uncap_first}List = '/${entityPackage}/${entityName?uncap_first}/query${sub.entityName}ByMainId',
+</#list>
+}
+/**
+ * Export API
+ * @param params
+ */
+export const getExportUrl = Api.exportXls;
+
+/**
+ * Import API
+ */
+export const getImportUrl = Api.importExcel;
+<#list subTables as sub><#rt/>
+/**
+ * Sub-form query API
+ * @param params
+ */
+export const query${sub.entityName} = Api.${sub.entityName?uncap_first}List
+</#list>
+/**
+ * List API
+ * @param params
+ */
+export const list = (params) =>
+  defHttp.get({url: Api.list, params});
+
+/**
+ * Delete single record
+ */
+export const deleteOne = (params,handleSuccess) => {
+  return defHttp.delete({url: Api.deleteOne, params}, {joinParamsToUrl: true}).then(() => {
+    handleSuccess();
+  });
+}
+/**
+ * Batch delete
+ * @param params
+ */
+export const batchDelete = (params, handleSuccess) => {
+  createConfirm({
+    iconType: 'warning',
+    title: 'ConfirmDelete',
+    content: 'Delete selected data?',
+    okText: 'Confirm',
+    cancelText: 'Cancel',
+    onOk: () => {
+      return defHttp.delete({url: Api.deleteBatch, data: params}, {joinParamsToUrl: true}).then(() => {
+        handleSuccess();
+      });
+    }
+  });
+}
+/**
+ * Save or update
+ * @param params
+ */
+export const saveOrUpdate = (params, isUpdate) => {
+  let url = isUpdate ? Api.edit : Api.save;
+  return defHttp.post({url: url, params});
+}
+<#list subTables as sub><#rt/>
+/**
+ * Sub-table list API
+ * @param params
+ */
+export const ${sub.entityName?uncap_first}List = (params) =>
+  defHttp.get({url: Api.${sub.entityName?uncap_first}List, params},{isTransformResponse:false});
+</#list>

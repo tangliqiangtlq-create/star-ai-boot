@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+
+  <springProperty scope="context" name="springAppName" source="spring.application.name"/>
+  <springProperty scope="context" name="springProfile" source="spring.profiles.active"/>
+
+  <!-- H1 TurboFilter 4-coverage: H1SensitiveTurboFilter registered programmatically at EnvironmentPreparedEvent via H1LogbackTurboConfigurator (jeecg-boot-base-core). Covers String + Throwable (ThrowableProxyUtil.asString) + gateway + xxljob 6 contexts. -->
+
+  <!-- Console appender -->
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{50}:%L) -
+        %msg%n
+      </pattern>
+    </encoder>
+  </appender>
+
+  <!-- File appender: C1-5 — max-size=500MB × 5 files (docs/安全问题修复/10 §4) -->
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <!-- Log directory under /data/logs -->
+    <file>/data/logs/${springAppName}.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+      <fileNamePattern>/data/logs/${springAppName}.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+      <maxFileSize>500MB</maxFileSize>
+      <maxHistory>5</maxHistory>
+      <totalSizeCap>2500MB</totalSizeCap>
+    </rollingPolicy>
+    <encoder>
+      <pattern>%d{ISO8601} %-5level [%thread] %logger{24} - %msg%n</pattern>
+    </encoder>
+  </appender>
+
+  <!-- Global JDBC logging: SQL only -->
+  <include resource="logback-jdbc.xml"/>
+
+  <springProfile name="prod">
+    <logger name="jdbc.sqlonly" level="WARN" additivity="false">
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="INFO">
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="STDOUT"/>
+    </root>
+  </springProfile>
+
+  <springProfile name="test">
+    <logger name="jdbc.sqlonly" level="WARN" additivity="false">
+      <appender-ref ref="FILE"/>
+    </logger>
+
+    <root level="INFO">
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="STDOUT"/>
+    </root>
+  </springProfile>
+
+  <!-- P4-5: docker-compose often uses SPRING_PROFILES_ACTIVE=dev — still write rolling files -->
+  <springProfile name="dev">
+    <logger name="jdbc.sqlonly" level="WARN" additivity="false">
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="INFO">
+      <appender-ref ref="FILE"/>
+      <appender-ref ref="STDOUT"/>
+    </root>
+  </springProfile>
+
+  <!-- Fallback when not dev/test/prod -->
+  <springProfile name="!dev &amp; !test &amp; !prod">
+    <logger name="jdbc.sqlonly" level="WARN" additivity="false">
+      <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <root level="INFO">
+      <appender-ref ref="STDOUT"/>
+    </root>
+  </springProfile>
+
+</configuration>

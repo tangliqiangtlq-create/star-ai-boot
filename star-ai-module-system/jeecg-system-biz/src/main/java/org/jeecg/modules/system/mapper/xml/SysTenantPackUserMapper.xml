@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.system.mapper.SysTenantPackUserMapper">
+
+    <!--Query the list of personnel with specific package roles under the tenant-->
+    <select id="queryTenantPackUserNameList" resultType="java.lang.String">
+        select a.username from sys_user a 
+        join sys_tenant_pack_user b on b.user_id = a.id 
+        join sys_tenant_pack c on c.id = b.pack_id
+        where b.status = 1 and c.tenant_id = #{tenantId}
+        and c.pack_code IN (
+        <foreach item="packCode" collection="packCodeList" separator=",">
+            #{packCode}
+        </foreach>
+        )
+    </select>
+    
+    <!--Determine whether the current user has administrator rights under the tenant-->
+    <select id="izHaveBuyAuth" resultType="java.lang.Long">
+        SELECT count(1) from sys_tenant_pack_user stpu
+        left join sys_tenant_pack stp on stpu.pack_id = stp.id
+        WHERE stpu.tenant_id = #{tenantId}
+        and stpu.user_id = #{userId}
+        and stp.pack_code in('superAdmin','accountAdmin')
+    </select>
+
+    <!--Delete users under tenant product packages based on tenant ID-->
+    <delete id="deletePackUserByTenantId">
+        delete from sys_tenant_pack_user where tenant_id = #{tenantId}
+        and user_id in
+        <foreach collection="userIds" index="index" item="userId" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+    
+    <!--Delete users under tenant product packages based on multiple tenant IDs-->
+    <delete id="deletePackUserByTenantIds">
+        delete from sys_tenant_pack_user
+        where tenant_id in
+        <foreach collection="tenantIds" index="index" item="tenantId" open="(" separator="," close=")">
+            #{tenantId}
+        </foreach>
+    </delete>
+</mapper>

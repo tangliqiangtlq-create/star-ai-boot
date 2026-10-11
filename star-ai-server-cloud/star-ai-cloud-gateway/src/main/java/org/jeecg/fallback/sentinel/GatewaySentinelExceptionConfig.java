@@ -1,0 +1,44 @@
+package org.jeecg.fallback.sentinel;
+
+import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.BlockRequestHandler;
+import com.alibaba.csp.sentinel.adapter.gateway.sc.callback.GatewayCallbackManager;
+import jakarta.annotation.PostConstruct;
+import org.jeecg.common.enums.SentinelErrorInfoEnum;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.server.ServerResponse;
+import java.util.HashMap;
+
+/**
+ * @Description: Custom Sentinel global exception handler (requires Sentinel client to be enabled)
+ * @author: zyf
+ * @date: 2022/02/18
+ * @version: V1.0
+ */
+@Configuration
+public class GatewaySentinelExceptionConfig {
+
+    @PostConstruct
+    public void init() {
+
+        BlockRequestHandler blockRequestHandler = (serverWebExchange, ex) -> {
+            String msg;
+            SentinelErrorInfoEnum errorInfoEnum = SentinelErrorInfoEnum.getErrorByException(ex);
+            if (ObjectUtil.isNotEmpty(errorInfoEnum)) {
+                msg = errorInfoEnum.getError();
+            } else {
+                msg = "Unknown rate limit fallback";
+            }
+            HashMap<String, String> map = new HashMap<>(5);
+            map.put("code", HttpStatus.TOO_MANY_REQUESTS.toString());
+            map.put("message", msg);
+            //CustomExceptionProcess
+            return ServerResponse.status(HttpStatus.OK).contentType(MediaType.APPLICATION_JSON).body(BodyInserters.fromValue(map));
+        };
+
+        GatewayCallbackManager.setBlockHandler(blockRequestHandler);
+    }
+}

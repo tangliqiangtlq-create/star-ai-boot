@@ -1,0 +1,86 @@
+# Example of secondary authentication configuration file
+# 
+# Add this configuration to application.yml or application-{profile}.yml
+# 
+# Instructions for use:
+# 1. There is no need to add @RequireSecondAuth annotation in the code at all
+# 2. Just configure the interface path and authentication type in the configuration file
+# 3. Support exact path matching and Ant-style path matching
+# 4. After the configuration is modified, the system will automatically apply the new authentication rules
+
+jeecg:
+  second-auth:
+    # Whether to enable secondary authentication in configuration mode
+    enabled: true
+    
+    # Default authentication type (used when the interface is not configured, if default authentication is not required, it does not need to be configured)
+    default-auth-type: VERIFICATION_CODE_ONLY
+    
+    # Mapping of interface paths and authentication types
+    mappings:
+      # ===========================================
+      # Exact path matching example
+      # ===========================================
+      
+      # Only verification code authentication
+      "/sys/noAnnotationExample/method1": VERIFICATION_CODE_ONLY
+      "/sys/user/updatePassword": VERIFICATION_CODE_ONLY
+      "/sys/user/updateEmail": VERIFICATION_CODE_ONLY
+      
+      # Pay password authentication only
+      "/sys/noAnnotationExample/method2": PAYMENT_PASSWORD_ONLY
+      "/sys/account/withdraw": PAYMENT_PASSWORD_ONLY
+      "/sys/account/transfer": PAYMENT_PASSWORD_ONLY
+      
+      # Two-factor authentication (verification code + payment password)
+      "/sys/noAnnotationExample/method3": BOTH_REQUIRED
+      "/sys/account/withdrawLarge": BOTH_REQUIRED
+      "/sys/user/deleteAccount": BOTH_REQUIRED
+      
+      # ===========================================
+      # Ant style path matching example
+      # ===========================================
+      
+      # Matches all interfaces under /sys/account and uses payment password authentication
+      "/sys/account/**": PAYMENT_PASSWORD_ONLY
+      
+      # Match all interfaces under /sys/user and use verification code authentication
+      "/sys/user/**": VERIFICATION_CODE_ONLY
+      
+      # Matches all interfaces under /sys/admin, using two-factor authentication
+      "/sys/admin/**": BOTH_REQUIRED
+      
+      # Match single-level paths (such as /sys/api/v1, /sys/api/v2)
+      "/sys/api/*": VERIFICATION_CODE_ONLY
+      
+      # ===========================================
+      # Actual business scenario examples
+      # ===========================================
+      
+      # User related operations - Verification code authentication
+      "/sys/user/updatePassword": VERIFICATION_CODE_ONLY
+      "/sys/user/updatePhone": VERIFICATION_CODE_ONLY
+      "/sys/user/updateEmail": VERIFICATION_CODE_ONLY
+      "/sys/user/bindBankCard": VERIFICATION_CODE_ONLY
+      
+      # Account related operations - payment password authentication
+      "/sys/account/withdraw": PAYMENT_PASSWORD_ONLY
+      "/sys/account/transfer": PAYMENT_PASSWORD_ONLY
+      "/sys/account/changePaymentPassword": PAYMENT_PASSWORD_ONLY
+      
+      # Sensitive Operations - Two-Factor Authentication
+      "/sys/account/withdrawLarge": BOTH_REQUIRED
+      "/sys/user/deleteAccount": BOTH_REQUIRED
+      "/sys/user/disableAccount": BOTH_REQUIRED
+      
+      # Bulk operations - using path wildcards
+      "/sys/batch/**": BOTH_REQUIRED
+      
+      # ===========================================
+      # Things to note
+      # ===========================================
+      # 1. Path matching priority: exact matching > wildcard matching
+      # 2. If both a precise path and a wildcard path are configured, the precise path takes precedence.
+      # 3. If an interface does not require secondary authentication, just do not configure the path.
+      # 4. After the configuration is modified, the system will automatically apply the new authentication rules (no need to restart, if using the configuration center)
+

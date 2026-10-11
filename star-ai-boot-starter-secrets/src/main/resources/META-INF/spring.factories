@@ -1,0 +1,3 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+org.jeecg.common.env.secrets.MpaySecretsEnvironmentPostProcessor,\
+org.jeecg.common.env.RepoRootDotEnvEnvironmentPostProcessor

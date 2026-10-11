@@ -1,0 +1,304 @@
+package ${bussiPackage}.${entityPackage}.controller;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.common.util.oConvertUtils;
+import org.jeecg.common.system.vo.SelectTreeModel;
+import ${bussiPackage}.${entityPackage}.entity.${entityName};
+import ${bussiPackage}.${entityPackage}.service.I${entityName}Service;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.extern.slf4j.Slf4j;
+
+import org.jeecgframework.poi.excel.ExcelImportUtil;
+import org.jeecgframework.poi.excel.def.NormalExcelConstants;
+import org.jeecgframework.poi.excel.entity.ExportParams;
+import org.jeecgframework.poi.excel.entity.ImportParams;
+import org.jeecgframework.poi.excel.view.JeecgEntityExcelView;
+import org.jeecg.common.system.base.controller.JeecgController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.servlet.ModelAndView;
+import com.alibaba.fastjson.JSON;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.jeecg.common.aspect.annotation.AutoLog;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+
+ /**
+ * @Description: ${tableVo.ftlDescription}
+ * @Author: jeecg-boot
+ * @Date:   ${.now?string["yyyy-MM-dd"]}
+ * @Version: V1.0
+ */
+<#assign pidFieldName = "">
+<#list originalColumns as po>
+<#if po.fieldDbName == tableVo.extendParams.pidField>
+<#assign pidFieldName = po.fieldName>
+</#if>
+</#list>
+@Api(tags="${tableVo.ftlDescription}")
+@RestController
+@RequestMapping("/${entityPackage}/${entityName?uncap_first}")
+@Slf4j
+public class ${entityName}Controller extends JeecgController<${entityName}, I${entityName}Service>{
+	@Autowired
+	private I${entityName}Service ${entityName?uncap_first}Service;
+
+	/**
+	 * Paginated list query
+	 *
+	 * @param ${entityName?uncap_first}
+	 * @param pageNo
+	 * @param pageSize
+	 * @param req
+	 * @return
+	 */
+	//@AutoLog(value = "${tableVo.ftlDescription}-Paginated list query")
+	@ApiOperation(value="${tableVo.ftlDescription}-Paginated list query", notes="${tableVo.ftlDescription}-Paginated list query")
+	@RequestMapping(value = "/rootList")
+	public Result<IPage<${entityName}>> queryPageList(${entityName} ${entityName?uncap_first},
+								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
+								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
+								   HttpServletRequest req) {
+		String hasQuery = req.getParameter("hasQuery");
+        if(hasQuery != null && "true".equals(hasQuery)){
+            QueryWrapper<${entityName}> queryWrapper =  QueryGenerator.initQueryWrapper(${entityName?uncap_first}, req.getParameterMap());
+            List<${entityName}> list = ${entityName?uncap_first}Service.queryTreeListNoPage(queryWrapper);
+            IPage<${entityName}> pageList = new Page<>(1, 10, list.size());
+            pageList.setRecords(list);
+            return Result.OK(pageList);
+        }else{
+            String parentId = ${entityName?uncap_first}.get${pidFieldName?cap_first}();
+            if (oConvertUtils.isEmpty(parentId)) {
+                parentId = "0";
+            }
+            ${entityName?uncap_first}.set${pidFieldName?cap_first}(null);
+            QueryWrapper<${entityName}> queryWrapper = QueryGenerator.initQueryWrapper(${entityName?uncap_first}, req.getParameterMap());
+            // Use eq to avoid fuzzy query
+            queryWrapper.eq("${Format.humpToUnderline(pidFieldName)}", parentId);
+            Page<${entityName}> page = new Page<${entityName}>(pageNo, pageSize);
+            IPage<${entityName}> pageList = ${entityName?uncap_first}Service.page(page, queryWrapper);
+            return Result.OK(pageList);
+        }
+	}
+
+	 /**
+	  * [Vue3] Load child data for node
+	  *
+	  * @param pid
+	  * @return
+	  */
+	 @RequestMapping(value = "/loadTreeChildren", method = RequestMethod.POST)
+	 public Result<List<SelectTreeModel>> loadTreeChildren(@RequestParam(name = "pid") String pid) {
+		 Result<List<SelectTreeModel>> result = new Result<>();
+		 try {
+			 List<SelectTreeModel> ls = ${entityName?uncap_first}Service.queryListByPid(pid);
+			 result.setResult(ls);
+			 result.setSuccess(true);
+		 } catch (Exception e) {
+			 e.printStackTrace();
+			 result.setMessage(e.getMessage());
+			 result.setSuccess(false);
+		 }
+		 return result;
+	 }
+
+	 /**
+	  * [Vue3] Load root nodes / all data when sync
+	  *
+	  * @param async
+	  * @param pcode
+	  * @return
+	  */
+	 @RequestMapping(value = "/loadTreeRoot", method = RequestMethod.POST)
+	 public Result<List<SelectTreeModel>> loadTreeRoot(@RequestParam(name = "async") Boolean async, @RequestParam(name = "pcode") String pcode) {
+		 Result<List<SelectTreeModel>> result = new Result<>();
+		 try {
+			 List<SelectTreeModel> ls = ${entityName?uncap_first}Service.queryListByCode(pcode);
+			 if (!async) {
+				 loadAllChildren(ls);
+			 }
+			 result.setResult(ls);
+			 result.setSuccess(true);
+		 } catch (Exception e) {
+			 e.printStackTrace();
+			 result.setMessage(e.getMessage());
+			 result.setSuccess(false);
+		 }
+		 return result;
+	 }
+
+	 /**
+	  * [Vue3] Recursively collect child nodes for sync load
+	  *
+	  * @param ls
+	  */
+	 private void loadAllChildren(List<SelectTreeModel> ls) {
+		 for (SelectTreeModel tsm : ls) {
+			 List<SelectTreeModel> temp = ${entityName?uncap_first}Service.queryListByPid(tsm.getKey());
+			 if (temp != null && temp.size() > 0) {
+				 tsm.setChildren(temp);
+				 loadAllChildren(temp);
+			 }
+		 }
+	 }
+
+	 /**
+      * Fetch child data
+      * @param ${entityName?uncap_first}
+      * @param req
+      * @return
+      */
+	//@AutoLog(value = "${tableVo.ftlDescription}-Fetch child data")
+	@ApiOperation(value="${tableVo.ftlDescription}-Fetch child data", notes="${tableVo.ftlDescription}-Fetch child data")
+	@RequestMapping(value = "/childList")
+	public Result<IPage<${entityName}>> queryPageList(${entityName} ${entityName?uncap_first},HttpServletRequest req) {
+		QueryWrapper<${entityName}> queryWrapper = QueryGenerator.initQueryWrapper(${entityName?uncap_first}, req.getParameterMap());
+		List<${entityName}> list = ${entityName?uncap_first}Service.list(queryWrapper);
+		IPage<${entityName}> pageList = new Page<>(1, 10, list.size());
+        pageList.setRecords(list);
+		return Result.OK(pageList);
+	}
+
+    /**
+      * Batch query child nodes
+      * @param parentIds parent IDs (comma-separated)
+      * @return IPage
+      * @param parentIds
+      * @return
+      */
+	//@AutoLog(value = "${tableVo.ftlDescription}-Batch fetch child data")
+    @ApiOperation(value="${tableVo.ftlDescription}-Batch fetch child data", notes="${tableVo.ftlDescription}-Batch fetch child data")
+    @RequestMapping("/getChildListBatch")
+    public Result getChildListBatch(@RequestParam("parentIds") String parentIds) {
+        try {
+            QueryWrapper<${entityName}> queryWrapper = new QueryWrapper<>();
+            List<String> parentIdList = Arrays.asList(parentIds.split(","));
+            queryWrapper.in("${Format.humpToUnderline(pidFieldName)}", parentIdList);
+            List<${entityName}> list = ${entityName?uncap_first}Service.list(queryWrapper);
+            IPage<${entityName}> pageList = new Page<>(1, 10, list.size());
+            pageList.setRecords(list);
+            return Result.OK(pageList);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return Result.error("Failed to batch query child nodes: " + e.getMessage());
+        }
+    }
+	
+	/**
+	 *   添加
+	 *
+	 * @param ${entityName?uncap_first}
+	 * @return
+	 */
+	@AutoLog(value = "${tableVo.ftlDescription}-添加")
+	@ApiOperation(value="${tableVo.ftlDescription}-添加", notes="${tableVo.ftlDescription}-添加")
+    @SaCheckPermission("${entityPackage}:${tableName}:add")
+	@PostMapping(value = "/add")
+	public Result<String> add(@RequestBody ${entityName} ${entityName?uncap_first}) {
+		${entityName?uncap_first}Service.add${entityName}(${entityName?uncap_first});
+		return Result.OK("Added successfully!");
+	}
+	
+	/**
+	 *  Edit
+	 *
+	 * @param ${entityName?uncap_first}
+	 * @return
+	 */
+	@AutoLog(value = "${tableVo.ftlDescription}-Edit")
+	@ApiOperation(value="${tableVo.ftlDescription}-Edit", notes="${tableVo.ftlDescription}-Edit")
+    @SaCheckPermission("${entityPackage}:${tableName}:edit")
+	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
+	public Result<String> edit(@RequestBody ${entityName} ${entityName?uncap_first}) {
+		${entityName?uncap_first}Service.update${entityName}(${entityName?uncap_first});
+		return Result.OK("Updated successfully!");
+	}
+	
+	/**
+	 *   Delete by id
+	 *
+	 * @param id
+	 * @return
+	 */
+	@AutoLog(value = "${tableVo.ftlDescription}-Delete by id")
+	@ApiOperation(value="${tableVo.ftlDescription}-Delete by id", notes="${tableVo.ftlDescription}-Delete by id")
+    @SaCheckPermission("${entityPackage}:${tableName}:delete")
+	@DeleteMapping(value = "/delete")
+	public Result<String> delete(@RequestParam(name="id",required=true) String id) {
+		${entityName?uncap_first}Service.delete${entityName}(id);
+		return Result.OK("Deleted successfully!");
+	}
+	
+	/**
+	 *  Batch delete
+	 *
+	 * @param ids
+	 * @return
+	 */
+	@AutoLog(value = "${tableVo.ftlDescription}-Batch delete")
+	@ApiOperation(value="${tableVo.ftlDescription}-Batch delete", notes="${tableVo.ftlDescription}-Batch delete")
+    @SaCheckPermission("${entityPackage}:${tableName}:deleteBatch")
+	@DeleteMapping(value = "/deleteBatch")
+	public Result<String> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
+		this.${entityName?uncap_first}Service.removeByIds(Arrays.asList(ids.split(",")));
+		return Result.OK("Batch deleted successfully!");
+	}
+	
+	/**
+	 * Query by id
+	 *
+	 * @param id
+	 * @return
+	 */
+	//@AutoLog(value = "${tableVo.ftlDescription}-Query by id")
+	@ApiOperation(value="${tableVo.ftlDescription}-Query by id", notes="${tableVo.ftlDescription}-Query by id")
+	@RequestMapping(value = "/queryById")
+	public Result<${entityName}> queryById(@RequestParam(name="id",required=true) String id) {
+		${entityName} ${entityName?uncap_first} = ${entityName?uncap_first}Service.getById(id);
+		if(${entityName?uncap_first}==null) {
+			return Result.error("No matching data found");
+		}
+		return Result.OK(${entityName?uncap_first});
+	}
+
+    /**
+    * Export Excel
+    *
+    * @param request
+    * @param ${entityName?uncap_first}
+    */
+    @SaCheckPermission("${entityPackage}:${tableName}:exportXls")
+    @RequestMapping(value = "/exportXls")
+    public ModelAndView exportXls(HttpServletRequest request, ${entityName} ${entityName?uncap_first}) {
+		return super.exportXls(request, ${entityName?uncap_first}, ${entityName}.class, "${tableVo.ftlDescription}");
+    }
+
+    /**
+      * Import data via Excel
+    *
+    * @param request
+    * @param response
+    * @return
+    */
+    @SaCheckPermission("${entityPackage}:${tableName}:importExcel")
+    @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
+    public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
+		return super.importExcel(request, response, ${entityName}.class);
+    }
+
+}

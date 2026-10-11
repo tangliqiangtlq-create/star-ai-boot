@@ -1,0 +1,32 @@
+# J12-c §8.2P1-4: 数据库连接凭据加密文件（原 jeecg_database.properties 明文泄露）
+# 用 Jasypt CLI 加密后填充 ENC(HEX) 格式；未填=启动 FAIL-FAST（拒绝连接明文默认凭据）
+# 加密命令：java -cp jasypt-1.9.3.jar org.jasypt.intf.cli.JasyptPBEStringEncryptionCLI input=PLAIN password=$JASYPT_ENCRYPTOR_PASSWORD algorithm=PBEWITHHMACSHA512ANDAES_256 ivGeneratorClassName=org.jasypt.iv.RandomIvGenerator
+# 对应 Jasypt springboot starter 自动解密 prefix=suffix=ENC()
+
+#mysql
+diver_name=com.mysql.jdbc.Driver
+url=jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:jeecg-boot}?useUnicode=true&characterEncoding=UTF-8&useSSL=true&requireSSL=true
+username=ENC(${DB_USERNAME_ENC:})
+password=ENC(${DB_PASSWORD_ENC:})
+database_name=${DB_NAME:jeecg-boot}
+
+#oracle
+#diver_name=oracle.jdbc.driver.OracleDriver
+#url=jdbc:oracle:thin:@${ORACLE_HOST:}:${ORACLE_PORT:1521}:ORCL
+#username=ENC(${ORACLE_USER_ENC:})
+#password=ENC(${ORACLE_PASSWORD_ENC:})
+#database_name=ORCL
+
+#postgre
+#diver_name=org.postgresql.Driver
+#url=jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_NAME:jeecg}
+#username=ENC(${PG_USER_ENC:})
+#password=ENC(${PG_PASSWORD_ENC:})
+#database_name=jeecg
+
+#SQLServer2005以上
+#diver_name=org.hibernate.dialect.SQLServerDialect
+#url=jdbc:sqlserver://${MSSQL_HOST:}:${MSSQL_PORT:1433};DatabaseName=${MSSQL_DB:jeecg}
+#username=ENC(${MSSQL_USER_ENC:})
+#password=ENC(${MSSQL_PASSWORD_ENC:})
+#database_name=jeecg

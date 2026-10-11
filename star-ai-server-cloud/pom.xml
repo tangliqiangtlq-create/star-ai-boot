@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <artifactId>star-ai-boot-parent</artifactId>
+        <groupId>org.jeecgframework.boot</groupId>
+        <version>3.7.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>star-ai-server-cloud</artifactId>
+    <packaging>pom</packaging>
+    <name>Star AI Server Cloud</name>
+    <description>Star AI 微服务层聚合工程</description>
+
+    <modules>
+        <!-- 基础设施 -->
+        <module>star-ai-cloud-gateway</module>
+        <module>star-ai-system-cloud-start</module>
+        <module>star-ai-visual</module>
+
+        <!-- AI 短剧业务微服务 -->
+        <module>star-ai-module-generate</module>
+        <module>star-ai-module-content</module>
+        <module>star-ai-module-provider</module>
+        <module>star-ai-module-billing</module>
+        <module>star-ai-module-team</module>
+        <module>star-ai-module-task</module>
+    </modules>
+</project>

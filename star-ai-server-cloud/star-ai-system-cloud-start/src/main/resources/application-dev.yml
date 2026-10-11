@@ -1,0 +1,27 @@
+# Only spring.profiles.active=dev takes effect.
+# Multi-network card/VPN local development: Write the IP once in the .env in the root directory of the warehouse, and it will be shared by all services (do not write it into Nacos / do not submit it to .env).
+# IDE Working directory Please set it as the warehouse root so that ./ .env can be loaded.
+spring:
+  config:
+    import:
+      - optional:file:./.env[.properties]
+  cloud:
+    inetutils:
+      preferred-networks: ${INETUTILS_PREFERRED_NETWORKS:}
+      ignored-interfaces: ${INETUTILS_IGNORED_INTERFACES:}
+    nacos:
+      discovery:
+        ip: ${SPRING_CLOUD_NACOS_DISCOVERY_IP:}
+
+# Phase A / A4-4: password-reset secret from env only — never plaintext in Git.
+# B8-1 XXL: do not hard-code here; use Nacos jeecg.yaml / jeecg-${profile}.yaml (docs/安全问题修复/10 §3.1 B8-1a).
+# Secrets and Admin URL only via ${XXL_JOB_ACCESS_TOKEN} / ${JEECG_XXLJOB_ADMIN_ADDRESSES}; per-service appname/port in each DataId.
+jeecg:
+  password-reset:
+    secret: ${RESET_SECRET}
+    portal-origin: ${PASSWORD_RESET_PORTAL_ORIGIN:http://localhost:3100}
+    trusted-proxy-hops: ${JEECG_TRUSTED_PROXY_HOPS:1}
+
+# SHARD-ADAPT dev sharding: pin the system module master URL to the mpay_system schema
+# USERNAME/PASSWORD are still resolved from ${MYSQL_USER}/${MYSQL_PASSWORD} in .env
+SPRING_DATASOURCE_DYNAMIC_DATASOURCE_MASTER_URL: jdbc:mysql://127.0.0.1:3306/mpay_system?characterEncoding=UTF-8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai

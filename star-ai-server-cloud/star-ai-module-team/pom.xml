@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>star-ai-boot-parent</artifactId>
+        <groupId>org.jeecgframework.boot</groupId>
+        <version>3.7.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>star-ai-module-team</artifactId>
+    <packaging>pom</packaging>
+    <name>团队管理微服务</name>
+    <description>多租户团队、成员管理、细粒度 RBAC 权限、消费限额、代登录</description>
+    <modules>
+        <module>star-ai-module-team-api</module>
+        <module>star-ai-module-team-biz</module>
+    </modules>
+</project>

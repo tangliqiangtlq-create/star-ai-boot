@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+  <turboFilter class="org.jeecg.common.logging.SqlOnlyJdbcTurboFilter"/>
+
+  <logger name="jdbc" level="OFF"/>
+  <logger name="jdbc.audit" level="OFF"/>
+  <logger name="jdbc.connection" level="OFF"/>
+  <logger name="jdbc.sqltiming" level="OFF"/>
+  <logger name="jdbc.resultset" level="OFF"/>
+  <logger name="jdbc.resultsettable" level="OFF"/>
+  <logger name="log4jdbc.debug" level="OFF"/>
+  <logger name="java.sql" level="OFF"/>
+  <logger name="com.apache.ibatis" level="WARN"/>
+</included>

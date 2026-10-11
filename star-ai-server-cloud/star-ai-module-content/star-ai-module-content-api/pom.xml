@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>star-ai-module-content</artifactId>
+        <groupId>org.jeecgframework.boot</groupId>
+        <version>3.7.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>star-ai-module-content-api</artifactId>
+    <name>剧本/分镜/素材微服务 - API</name>
+    <description>剧本生成、分镜管理、素材库（角色/场景/道具/抽帧/火山虚拟库） - 远程服务接口定义</description>
+    <dependencies>
+        <dependency>
+            <groupId>org.jeecgframework.boot</groupId>
+            <artifactId>star-ai-boot-base-core</artifactId>
+        </dependency>
+    </dependencies>
+</project>

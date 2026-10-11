@@ -1,0 +1,87 @@
+server:
+  port: 9000
+  servlet:
+      context-path: /xxl-job-admin
+  #Data source configuration
+spring:
+  datasource:
+    # SHARD-ADAPT dev local sharding: useSSL=false avoids SSLHandshakeException because the local Docker MySQL has no trusted CA certificate
+    # Production must revert to useSSL=true&requireSSL=true&verifyServerCertificate=true (see application-prod.yml)
+    url: jdbc:mysql://${MYSQL_SERVICE_HOST:127.0.0.1}:${MYSQL_SERVICE_PORT:3306}/${MYSQL_SERVICE_DB_NAME:?MYSQL_SERVICE_DB_NAME is required for xxl-job (per-schema name; do not fallback legacy xxl_job default)}?characterEncoding=UTF-8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USER:root}
+    # Prefer MYSQL_PASSWORD from repo-root .env (avoid MYSQL-PWD — hyphens often fail on Windows/IDE)
+    password: ${MYSQL_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      # B11-1 Hikari CP defaults
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MIN_IDLE:8}
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAX_POOL_SIZE:30}
+      auto-commit: true
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:8000}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      pool-name: HikariCP-XXL
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      keepalive-time: ${SPRING_DATASOURCE_HIKARI_KEEPALIVE_TIME:120000}
+      leak-detection-threshold: ${SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD:2000}
+      validation-timeout: ${SPRING_DATASOURCE_HIKARI_VALIDATION_TIMEOUT:5000}
+      connection-test-query: SELECT 1
+      transaction-isolation: ${SPRING_DATASOURCE_HIKARI_TX_ISOLATION:TRANSACTION_READ_COMMITTED}
+  #Email configuration
+  mail:
+    host: ${MAIL_HOST:smtphz.qiye.163.com}
+    port: ${MAIL_PORT:994}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          socketFactory:
+            class: javax.net.ssl.SSLSocketFactory
+  #MVC configuration
+  mvc:
+    servlet:
+      load-on-startup: 0
+    static-path-pattern: /static/**
+  resources:
+    static-locations: classpath:/static/
+  #freemarker configuration
+  freemarker:
+    templateLoaderPath=classpath: /templates/
+    suffix: .ftl
+    charset: UTF-8
+    request-context-attribute: request
+    settings:
+      number_format: 0.##########
+#Common configuration, open endpoints
+management:
+  server:
+    servlet:
+      context-path: /actuator
+  health:
+    mail:
+      enabled: false
+#mybatis configuration
+mybatis:
+  mapper-locations: classpath:/mybatis-mapper/*Mapper.xml
+#XXL-job configuration
+xxl:
+  job:
+    login:
+      username: ${XXL_JOB_LOGIN_USERNAME:admin}
+      password: ${XXL_JOB_LOGIN_PASSWORD:}
+    # Access token used for API calls, needs to be consistent with jeecg.xxljob.accessToken
+    accessToken: ${XXL_JOB_ACCESS_TOKEN}
+    i18n: en
+    #trigger pool
+    triggerpool:
+      fast:
+        max: 200
+      slow:
+        max: 100
+    # Auto-clean schedule logs older than N days (min 7; <7 disables). JobLogReportHelper runs daily.
+    logretentiondays: ${XXL_JOB_LOG_RETENTION_DAYS:7}

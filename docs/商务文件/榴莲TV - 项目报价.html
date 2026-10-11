@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>榴莲TV · 项目报价方案</title>
+<style>
+:root {
+  --primary: #1e40af; --primary-dark: #1e3a8a; --primary-light: #dbeafe;
+  --accent: #3b82f6; --text: #1e293b; --muted: #64748b;
+  --line: #e2e8f0; --bg-alt: #f1f5f9;
+}
+html { margin:0; padding:0; font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; color: var(--text); line-height:1.55; }
+@page { size: A4 landscape; margin: 12mm 14mm; }
+body { max-width: 280mm; margin: 0 auto; font-size: 11px; }
+.cover { border: 3px solid var(--primary); border-radius: 8px; padding: 16px 24px; margin-bottom: 16px; background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); color:#fff; }
+.cover .tag { font-size: 9px; letter-spacing: 3px; opacity: 0.8; }
+.cover .t { font-size: 24px; font-weight: 900; margin: 4px 0; border-bottom: 2px solid rgba(255,255,255,.4); padding-bottom: 8px; }
+.cover .sub { font-size: 11px; opacity: .9; }
+.cover .total { display:inline-block; margin-top:10px; background:#fff; color:var(--primary-dark); font-size:18px; font-weight:900; padding:6px 20px; border-radius:4px; letter-spacing:2px; }
+.cover .meta { float:right; text-align:right; margin-top:14px; font-size:9px; opacity:.8; }
+h1 { font-size:18px; font-weight:900; color:var(--primary-dark); border-left:5px solid var(--primary); padding:3px 0 3px 10px; margin:20px 0 12px; background:var(--primary-light); border-radius:0 4px 4px 0; page-break-after:avoid; }
+h2 { font-size:14px; font-weight:800; color:var(--primary-dark); margin:16px 0 8px; padding-bottom:3px; border-bottom:2px solid var(--primary-light); page-break-after:avoid; }
+h3 { font-size:12px; font-weight:700; color:var(--primary); margin:12px 0 6px; page-break-after:avoid; }
+table { width:100%; border-collapse:collapse; font-size:10px; margin:6px 0 12px; }
+thead th { background:var(--primary); color:#fff; padding:6px 7px; font-weight:700; text-align:left; white-space:nowrap; font-size:10px; }
+tbody td { padding:4px 7px; border-bottom:1px solid var(--line); vertical-align:top; }
+tbody tr:nth-child(even) { background:var(--bg-alt); }
+tbody td:first-child { white-space:nowrap; font-weight:600; color:var(--primary-dark); }
+tbody tr td, thead tr th { page-break-inside:avoid; }
+ul,ol { padding-left:16px; margin:4px 0; }
+li { margin:1px 0; font-size:10.5px; }
+code { background:var(--bg-alt); color:var(--primary-dark); padding:1px 4px; border-radius:3px; font-size:10px; }
+blockquote { border-left:3px solid var(--accent); padding:3px 10px; margin:6px 0; background:var(--primary-light); font-size:10px; }
+hr { border:none; border-top:1px solid var(--line); margin:14px 0; }
+img { max-width:100%; height:auto; border:1px solid var(--line); border-radius:4px; margin:4px 0 10px; page-break-inside:avoid; }
+h1,h2,h3,table,tr,img,blockquote,li { page-break-inside:avoid; break-inside:avoid; }
+</style>
+</head>
+<body>
+<div class="cover">
+  <div class="tag">PROJECT PROPOSAL · CONFIDENTIAL</div>
+  <div class="t">🍈 榴莲 TV · 项目报价方案</div>
+  <div class="sub">18+ 短剧视频平台 · 播放端（H5/iOS/Android）+ 创作者端 + JeecgBoot 管理后台</div>
+  <div class="total">TOTAL · $50,000 USD</div>
+  <div class="meta"><div>Version 2.0</div><div>2026-10-11</div></div>
+  <div style="clear:both;"></div>
+</div>
+<h1>榴莲 TV · 混合架构项目报价</h1>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>项目名称</strong></td>
+<td>榴莲 TV（18+ 短剧视频平台）</td>
+</tr>
+<tr>
+<td><strong>架构方案</strong></td>
+<td>Next.js 15 (App Router) + Capacitor 6 + JeecgBoot (Java)</td>
+</tr>
+<tr>
+<td><strong>交付端</strong></td>
+<td>播放端（H5 / iOS / Android 三端一套代码）、创作者端、平台管理后台</td>
+</tr>
+<tr>
+<td><strong>不含范围</strong></td>
+<td>AI 编辑器、AI 剧本生成、AI 视频合成（本次仅做播放 + 创作者 + 后台）</td>
+</tr>
+<tr>
+<td><strong>报价有效期</strong></td>
+<td>2026-10-11 ~ 2026-11-11</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>一、总价 &amp; 预算分配</h2>
+<h3>总价：<strong>USD 50,000 / 美元 伍万圆整</strong></h3>
+<table>
+<thead>
+<tr>
+<th>模块</th>
+<th>占比</th>
+<th>金额 (USD)</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>① 播放端（H5 + iOS + Android）</td>
+<td>48%</td>
+<td><strong>$24,000</strong></td>
+<td>三端一套代码（Capacitor 混合打包），含 HLS 播放器 + 4 种解锁方式 + 6 种卡片角标 + SEO SSR</td>
+</tr>
+<tr>
+<td>② 创作者端（Web + App 内嵌）</td>
+<td>27%</td>
+<td><strong>$13,500</strong></td>
+<td>KYC + 自助定价 + 分润透明化 + 创作者主页</td>
+</tr>
+<tr>
+<td>③ 平台管理后台（JeecgBoot 定制）</td>
+<td>25%</td>
+<td><strong>$12,500</strong></td>
+<td>内容审核（18+ 合规）+ 订单支付 + 分润结算 + 数据看板 + 系统配置</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td><strong>100%</strong></td>
+<td><strong>$50,000</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>二、功能清单（二级明细，与原型一一对应）</h2>
+<h3>① 播放端 · H5 / iOS / Android（$24,000）</h3>
+<blockquote>
+<p>原型出处：<code>index.html</code> + <code>video.html</code> + <code>subscription.html</code></p>
+</blockquote>
+<h4>1.1 首页 Browse</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.1.1</td>
+<td>Hero Banner 轮播</td>
+<td>3 帧自动轮播 + 手动滑动 + 底部指示器 + CTA "立即观看" 按钮</td>
+<td>行业内无此设计</td>
+</tr>
+<tr>
+<td>1.1.2</td>
+<td>频道 Tab 切换</td>
+<td>5 个 Tab：全部 / 按集解锁 / VIP / 排行榜 / 创作者</td>
+<td>增加「创作者」Tab（行业少见）</td>
+</tr>
+<tr>
+<td>1.1.3</td>
+<td>卡片网格</td>
+<td>移动端 2 列 / 平板 3 列 / H5 桌面 4 列自适应，卡片含封面 + 标题 + 播放时长 + 角标</td>
+<td>仅 2 列，信息密度偏低</td>
+</tr>
+<tr>
+<td>1.1.4</td>
+<td>卡片角标系统（6 种）</td>
+<td>① 💰 按集解锁 ② 🔒 VIP 专享 ③ �� 前 N 集免费（可配置 N=1~10）④ ⏱ 时长 ⑤ ⭐ 评分 ⑥ 📺 LIVE 直播中</td>
+<td>ManyVids 仅 6 种，我们更精炼</td>
+</tr>
+<tr>
+<td>1.1.5</td>
+<td>VIP 专享专区</td>
+<td>首页独立板块，仅 VIP 会员可见，卡片带 🔒 VIP 角标</td>
+<td>参考行业头部方案</td>
+</tr>
+<tr>
+<td>1.1.6</td>
+<td>下拉刷新 + 无限加载</td>
+<td>列表滚动到底部自动加载下一页，下拉刷新回到顶部</td>
+<td>基础功能</td>
+</tr>
+</tbody>
+</table>
+<h4>1.2 视频详情页</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.2.1</td>
+<td>HLS 播放器（hls.js）</td>
+<td>自适应码率（360p / 720p / 1080p / 4K 自动切换）· 4K 支持 · 硬解优先软解兜底 · 播放记忆（下次打开自动续播）</td>
+<td>自研 HLS 引擎，非原生解码</td>
+</tr>
+<tr>
+<td>1.2.2</td>
+<td>后台播放（3 层级）</td>
+<td>① 音频后台（锁屏继续听 0.5 天）② 画中画 PiP（后台小窗 1 天）③ 原生级后台（完整后台 2-3 周，需 iOS/Android 原生插件）</td>
+<td>Capacitor 原生桥接</td>
+</tr>
+<tr>
+<td>1.2.3</td>
+<td>画中画 PiP</td>
+<td>iOS 14+ / Android 8+ 支持，小窗拖拽 + 缩放</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.2.4</td>
+<td><strong>4 种解锁方式组合</strong></td>
+<td>① 单集永久解锁 ② 剧集打包解锁（自动计算折扣，比逐集买省）③ VIP 会员免看 ④ 前 N 集免费（平台方配置，所有人可看）</td>
+<td>行业解锁方式最多样，远超竞品</td>
+</tr>
+<tr>
+<td>1.2.5</td>
+<td>解锁方式智能推荐</td>
+<td>基于用户购买历史自动推荐最划算的解锁方式，并高亮显示</td>
+<td><strong>独有</strong></td>
+</tr>
+<tr>
+<td>1.2.6</td>
+<td>选集列表</td>
+<td>横向滚动 + 网格两种视图 · 每集三态标识（已看 ✓ / 可看 ▶ / 🔒 未解锁）· 播放进度条</td>
+<td>对标 Netflix</td>
+</tr>
+<tr>
+<td>1.2.7</td>
+<td>视频信息区</td>
+<td>标题 + 创作者头像 + 关注按钮 + 播放量 + 点赞数 + 标签</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.2.8</td>
+<td>评论区</td>
+<td>登录态校验 · 敏感词过滤（对接后台敏感词库）· 点赞 / 回复 · 分页加载</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.2.9</td>
+<td>相关推荐</td>
+<td>基于标签 + 创作者 + 播放历史推荐 6-10 条相似视频</td>
+<td>基础功能</td>
+</tr>
+</tbody>
+</table>
+<h4>1.3 搜索</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.3.1</td>
+<td>关键词搜索</td>
+<td>防抖 300ms · 搜索结果按相关度 + 热度排序</td>
+</tr>
+<tr>
+<td>1.3.2</td>
+<td>热门标签</td>
+<td>后台配置的热门搜索词，点击直接搜索</td>
+</tr>
+<tr>
+<td>1.3.3</td>
+<td>搜索历史</td>
+<td>本地缓存最近 20 条历史记录，可一键清空</td>
+</tr>
+</tbody>
+</table>
+<h4>1.4 用户中心</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>技术出处</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.4.1</td>
+<td>登录注册</td>
+<td><strong>邮箱验证码登录</strong>（本期唯一登录方式）· 邮箱注册 + 6 位数字验证码（Redis 存储 · 有效期 5 分钟 · 单邮箱 1 分钟限发 1 次）（Sa-Token 鉴权）· <strong>Google 账号登录不在本期</strong>，客户申请 Google OAuth 后可作为后续扩展</td>
+<td>JeecgBoot Auth 模块 + Redis 限流</td>
+</tr>
+<tr>
+<td>1.4.2</td>
+<td>我的已购</td>
+<td>按购买类型分组（单集 / 打包 / VIP）· 一键续播</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.4.3</td>
+<td>我的收藏</td>
+<td>视频收藏列表 · 取消收藏 · 一键播放</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.4.4</td>
+<td>观看历史</td>
+<td>按时间倒序 · 自动续播上次退出位置 · 清空历史</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.4.5</td>
+<td>充值中心</td>
+<td>微信支付 + 支付宝 · 充值套餐（充多少送多少，后台可配置）· 充值记录</td>
+<td>微信 / 支付宝官方 SDK</td>
+</tr>
+<tr>
+<td>1.4.6</td>
+<td>会员中心</td>
+<td>3 档方案（月 / 季 / 年，价格后台可配置）· 年会员最划算（折扣比例后台可配）· 权益差异化（VIP 专属内容 + 多 N 集免费（N 后台可配）+ 无广告）· 自动续费开关</td>
+<td>参考行业头部方案 + Netflix</td>
+</tr>
+</tbody>
+</table>
+<h4>1.5 技术特性（非 UI 功能）</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>战略意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.5.1</td>
+<td>SEO 优化（Next.js SSR/ISR）</td>
+<td>视频详情页 ISR 预渲染 · 动态 OG 图（自动生成视频封面 + 标题）· 结构化数据 Schema.org · robots.txt · sitemap.xml</td>
+<td><strong>生命线</strong>（18+ 站无法投 Facebook/Google 广告，SEO = 唯一免费流量入口）</td>
+</tr>
+<tr>
+<td>1.5.2</td>
+<td>App Deep Link</td>
+<td><code>duriantv://video/123</code> → App 内直接打开视频 · 未安装 App 跳 H5 播放页</td>
+<td>App 安装引导</td>
+</tr>
+<tr>
+<td>1.5.3</td>
+<td>本地缓存（Capacitor Preferences）</td>
+<td>播放进度 · 登录态 Token · 用户设置（画质 / 自动播放 / 后台播放）· 弱网体验优化</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>1.5.4</td>
+<td>推送通知（FCM / APNs / 极光）</td>
+<td>新剧集更新 · 充值到账 · 创作者开播</td>
+<td>Capacitor Push 插件</td>
+</tr>
+<tr>
+<td>1.5.5</td>
+<td>反爬保护</td>
+<td>登录态校验 · 接口限流（Redis）· HLS 签名 URL（CDN 鉴权）</td>
+<td>18+ 内容版权保护</td>
+</tr>
+<tr>
+<td>1.5.6</td>
+<td>三端打包</td>
+<td>iOS（Xcode + Capacitor）· Android（Gradle + Capacitor）· H5（Next.js export 静态化）· 一套代码出三端</td>
+<td>省 60% 重复开发</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>② 创作者端 · Web + App 内嵌（$13,500）</h3>
+<blockquote>
+<p>原型出处：<code>creator.html</code> + <code>creator-page.html</code></p>
+</blockquote>
+<h4>2.1 KYC 认证</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>合规要求</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.1.1</td>
+<td>年龄声明</td>
+<td>电子签署"本人年满 18 周岁"声明书</td>
+<td>合规留存</td>
+</tr>
+</tbody>
+</table>
+<h4>2.2 内容管理</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.2.1</td>
+<td>视频上传</td>
+<td>分片直传 S3/OSS（支持 1GB+ 大文件）· 上传进度条 · 断点续传（刷新页面不丢失）</td>
+<td>参考 YouTube 模式</td>
+</tr>
+<tr>
+<td>2.2.2</td>
+<td>自动转码 + 封面截取</td>
+<td>上传后自动触发转码任务（360p / 720p / 1080p / 4K 四档 HLS）· 自动截取 3 帧封面供创作者选择 · 生成 .m3u8 + .ts 文件</td>
+<td>后端 FFmpeg 任务队列</td>
+</tr>
+<tr>
+<td>2.2.3</td>
+<td>剧集管理</td>
+<td>创建剧集 · 分集上传 · 拖拽排序 · 分集批量下架 · 分集编辑（标题 / 简介 / 标签）</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>2.2.4</td>
+<td>标签 &amp; 分类</td>
+<td>每集最多 5 个自定义标签 · 必选 1 个平台分类（情感 / 悬疑 / 都市 / 古装 等）</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>2.2.5</td>
+<td>审核状态展示</td>
+<td>每集独立审核状态：待审核 / 已通过 / 被拒（附具体原因）· 被拒可修改后重新提交</td>
+<td>基础功能</td>
+</tr>
+</tbody>
+</table>
+<h4>2.3 定价设置（核心差异化）</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.3.1</td>
+<td>单集定价</td>
+<td>滑块 + 手动输入 · 定价区间后台可配置 · 实时显示"当前定价 X，用户端卡片显示 💰 X"</td>
+<td>参考 ManyVids 模式</td>
+</tr>
+<tr>
+<td>2.3.2</td>
+<td>剧集打包价</td>
+<td>系统自动计算（默认逐集总价 × 折扣比例，折扣比例后台可配置）· 创作者可手动调整折扣（± 范围后台可配）· 实时对比逐集 vs 打包价</td>
+<td>视频详情页"最划算"转化</td>
+</tr>
+<tr>
+<td>2.3.3</td>
+<td>定价规则提示</td>
+<td>平台定价区间提示 + 过低定价警告（阈值后台可配）+ 建议参考价（同类创作者均价）</td>
+<td>辅助定价决策</td>
+</tr>
+</tbody>
+</table>
+<h4>2.4 数据看板 &amp; 分润</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.4.1</td>
+<td>播放量统计</td>
+<td>日 / 周 / 月播放量折线图 · 按集 / 按剧集 / 按时间筛选</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>2.4.2</td>
+<td>收入统计</td>
+<td>日 / 周 / 月收入数字卡片 · 收入类型拆分（单集 / 打包 / VIP 分成）</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>2.4.3</td>
+<td>粉丝增长</td>
+<td>日 / 周 / 月粉丝增长折线图 · 粉丝总数 · 粉丝活跃率</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>2.4.4</td>
+<td><strong>分润透明化展示</strong></td>
+<td>每笔订单实时显示："本单金额 · 平台抽成比例（后台可配）· 创作者实际收入"（百分比动态读取后台配置）</td>
+<td><strong>独有</strong>（增强创作者信任）</td>
+</tr>
+<tr>
+<td>2.4.5</td>
+<td>分润结算明细</td>
+<td>完整列表：订单 ID · 购买时间 · 用户（脱敏）· 购买类型 · 订单金额 · 平台抽成 · 创作者分成 · 结算状态</td>
+<td><strong>独有</strong>（完全透明，可下载 CSV）</td>
+</tr>
+</tbody>
+</table>
+<h4>2.5 提现</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.5.1</td>
+<td>提现申请</td>
+<td>仅支持 <strong>USDT / USDC</strong>（链上结算）· 创作者需预先上传提现钱包地址（链 + 地址，USDT 需指定链：TRC20 / ERC20 / BSC）· 钱包地址绑定后可修改但需二次验证 · 链上转账 1-2 工作日到账 · 最低提现额（后台可配置）</td>
+</tr>
+<tr>
+<td>2.5.2</td>
+<td>提现记录</td>
+<td>历史提现列表 · 状态（审核中 / 已打款 / 被拒）· 被拒原因</td>
+</tr>
+<tr>
+<td>2.5.3</td>
+<td>累计收入汇总</td>
+<td>可提现余额 · 累计已提现 · 累计冻结资金（审核中）</td>
+</tr>
+</tbody>
+</table>
+<h4>2.6 创作者主页（用户端）</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2.6.1</td>
+<td>创作者信息区</td>
+<td>头像 + 昵称 + 认证标识 ✅ + 简介 + 粉丝数 + 作品数 + 关注按钮</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>2.6.2</td>
+<td>分润说明区</td>
+<td>"💎 榴莲 TV 分润透明化 · 平台抽成比例公开透明 · 创作者获得最大收益"（比例数字由后台配置动态展示）</td>
+<td><strong>独有</strong>（建立用户信任）</td>
+</tr>
+<tr>
+<td>2.6.3</td>
+<td>视频列表</td>
+<td>公开视频（免费看预告）+ 付费视频（显示解锁方式角标）· 按热度 / 按时间排序</td>
+<td>基础功能</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>③ 平台管理后台 · JeecgBoot 定制（$12,500）</h3>
+<h4>3.1 内容管理</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>技术出处</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.1.1</td>
+<td>视频列表</td>
+<td>全平台视频列表 · 筛选（状态 / 创作者 / 分类 / 时间）· 操作（上架 / 下架 / 删除 / 强制通过）</td>
+<td>JeecgBoot Online 表单</td>
+</tr>
+<tr>
+<td>3.1.2</td>
+<td>剧集管理</td>
+<td>剧集列表 · 关联分集 · 批量操作（批量下架 / 批量改分类）</td>
+<td>Online 表单</td>
+</tr>
+<tr>
+<td>3.1.3</td>
+<td>标签管理</td>
+<td>全局标签库 · 新增 / 编辑 / 删除 · 标签热度统计</td>
+<td>自定义表</td>
+</tr>
+<tr>
+<td>3.1.4</td>
+<td>分类管理</td>
+<td>平台分类（情感 / 悬疑 / 都市 / 古装 等）· 分类排序 · 分类封面</td>
+<td>SysCategory 扩展</td>
+</tr>
+</tbody>
+</table>
+<h4>3.2 审核中心（18+ 合规核心）</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>合规意义</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.2.1</td>
+<td>自动审批（云厂商）</td>
+<td>对接阿里云 / 腾讯云内容安全 API · 三大维度：① 鉴黄（识别色情画面）② 暴力（识别血腥暴力）③ 违禁词（识别敏感词汇）· 自动对合规内容标记通过，疑似内容自动推送人工复核 · 降低人工审核成本 80%</td>
+<td></td>
+</tr>
+<tr>
+<td>3.2.2</td>
+<td>人工审核队列</td>
+<td>疑似内容自动进入人工审核队列 · 审核员可看视频预览 + 云厂商自动审核结果 · 操作：通过 ✅ / 拒绝 ❌（必须填写原因）/ 打回修改</td>
+<td>合规最终保障</td>
+</tr>
+<tr>
+<td>3.2.3</td>
+<td>审核通知</td>
+<td>审核结果自动推送创作者（App 推送 + 站内信）· 被拒内容附具体修改建议</td>
+<td>降低创作者流失</td>
+</tr>
+<tr>
+<td>3.2.4</td>
+<td>审核日志</td>
+<td>完整审核记录：谁在什么时间做了什么操作 · 可追溯 · 审计用途</td>
+<td>合规留存</td>
+</tr>
+</tbody>
+</table>
+<h4>3.3 订单 &amp; 支付</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>技术出处</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.3.1</td>
+<td>订单列表</td>
+<td>全平台订单 · 4 种订单类型：充值 / 购买单集 / 购买剧集打包 / VIP 开通 · 筛选（类型 / 用户 / 时间 / 状态）· 全链路追踪（支付 → 解锁 → 分润 → 结算）</td>
+<td>JeecgBoot 订单模块扩展</td>
+</tr>
+<tr>
+<td>3.3.2</td>
+<td>支付渠道对接</td>
+<td>微信支付（JSAPI H5 + APP 支付）+ 支付宝（H5 + APP 支付）· 回调验签 · 支付超时自动关闭订单</td>
+<td>官方 SDK</td>
+</tr>
+<tr>
+<td>3.3.3</td>
+<td>退款处理</td>
+<td>用户申请退款 · 审核（可自动 / 可人工）· 原路退回 · 退款后自动收回解锁权益</td>
+<td>基础功能</td>
+</tr>
+<tr>
+<td>3.3.4</td>
+<td>充值管理</td>
+<td>充值套餐配置（充多少送多少）· 充值记录 · 退款记录</td>
+<td>SysParams 配置</td>
+</tr>
+</tbody>
+</table>
+<h4>3.4 分润结算</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>业务逻辑</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.4.1</td>
+<td>自动分润计算</td>
+<td>每笔订单支付成功后实时计算 · 平台抽成 / 创作者分成比例（后台可配置）· 存入分润明细表</td>
+<td>JeecgBoot AutoJob 异步任务</td>
+</tr>
+<tr>
+<td>3.4.2</td>
+<td>创作者提现审核</td>
+<td>创作者发起提现申请 · 后台审核（自动 / 人工）· 审核通过后触发 <strong>链上自动打款</strong>（USDT / USDC，按创作者绑定的钱包地址）· 打款哈希回写 · 打款失败自动退款至平台余额</td>
+<td>链上转账集成</td>
+</tr>
+<tr>
+<td>3.4.3</td>
+<td>分润报表</td>
+<td>日 / 周 / 月分润汇总 · 创作者收入排行榜 · 平台抽成收入报表 · 支持导出 Excel / CSV</td>
+<td>ECharts + 自定义报表</td>
+</tr>
+</tbody>
+</table>
+<h4>3.5 用户管理</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.5.1</td>
+<td>C 端用户列表</td>
+<td>用户账号 · 消费总额 · 登录日志 · 注册时间 · 禁用 / 启用账号 · 强制下线</td>
+</tr>
+<tr>
+<td>3.5.2</td>
+<td>创作者列表</td>
+<td>KYC 状态（未认证 / 审核中 / 已认证 / 被拒）· 认证信息 · 收入总额 · 作品数 · 禁用创作者</td>
+</tr>
+<tr>
+<td>3.5.3</td>
+<td>VIP 会员管理</td>
+<td>会员等级（普通 / VIP）· 到期提醒 · 手动开通 / 取消 VIP · 会员权益配置（可看内容范围 + 免费集数）</td>
+</tr>
+</tbody>
+</table>
+<h4>3.6 内容运营</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.6.1</td>
+<td>Hero Banner 管理</td>
+<td>后台配置首页 3 帧 Banner · 上传图片 · 跳转链接（视频页 / 剧集页 / 创作者页）· 排序 + 上下架</td>
+</tr>
+<tr>
+<td>3.6.2</td>
+<td>排行榜管理</td>
+<td>日榜 / 周榜 / 月榜 · 自动按播放量 / 收入计算 · 支持手动调整排名（运营干预）· 榜单 Banner</td>
+</tr>
+<tr>
+<td>3.6.3</td>
+<td>SEO 配置</td>
+<td>动态 OG 图模板（Next.js Metadata API）· 关键词白名单 · sitemap.xml 手动触发更新</td>
+</tr>
+</tbody>
+</table>
+<h4>3.7 数据看板</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.7.1</td>
+<td>核心指标仪表盘</td>
+<td>GMV（总交易额）· DAU（日活）· MAU（月活）· 新增用户 · 新增创作者 · 分润总额 · 实时仪表盘</td>
+</tr>
+<tr>
+<td>3.7.2</td>
+<td>用户行为分析</td>
+<td>播放量 Top 10 视频 · 转化率（浏览 → 解锁）· 热门解锁方式分布</td>
+</tr>
+<tr>
+<td>3.7.3</td>
+<td>趋势图</td>
+<td>日 / 周 / 月 GMV 趋势 · 日活趋势 · 新增创作者趋势</td>
+</tr>
+</tbody>
+</table>
+<h4>3.8 系统配置</h4>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>子功能</th>
+<th>详细说明</th>
+<th>技术出处</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3.8.1</td>
+<td>定价区间配置</td>
+<td>单集定价上下限 · 打包折扣范围 · VIP 月/季/年价格 · 充值套餐配置</td>
+<td>SysParams</td>
+</tr>
+<tr>
+<td>3.8.2</td>
+<td>分润比例配置</td>
+<td>平台抽成比例（默认值后台预设，可随时调整）· VIP 分成比例独立配置 · 修改后生效时间（即时 / 次日）</td>
+<td>SysParams</td>
+</tr>
+<tr>
+<td>3.8.3</td>
+<td>敏感词配置</td>
+<td>审核敏感词库（云厂商自动过滤 + 人工复核）· 创作者内容过滤词库 · 正则模式支持</td>
+<td>自定义表</td>
+</tr>
+<tr>
+<td>3.8.4</td>
+<td>后台权限（RBAC）</td>
+<td>4 种角色：超级管理员 / 审核员 / 运营 / 财务 · 每种角色独立菜单 + 按钮权限 + 数据权限</td>
+<td>JeecgBoot RBAC</td>
+</tr>
+<tr>
+<td>3.8.5</td>
+<td>轮播图 / 公告</td>
+<td>App 启动页公告 · 运营弹窗 · 全站公告栏</td>
+<td>自定义 CMS</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>三、技术栈</h2>
+<table>
+<thead>
+<tr>
+<th>层</th>
+<th>技术</th>
+<th>版本</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>前端</strong>（播放端 + 创作者端）</td>
+<td>Next.js</td>
+<td>15.x</td>
+<td>App Router · SSR / ISR · Turbopack</td>
+</tr>
+<tr>
+<td></td>
+<td>React</td>
+<td>19.x</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td>TypeScript</td>
+<td>5.x</td>
+<td>类型安全</td>
+</tr>
+<tr>
+<td></td>
+<td>Tailwind CSS</td>
+<td>3.x</td>
+<td>原子化 CSS</td>
+</tr>
+<tr>
+<td></td>
+<td>hls.js</td>
+<td>1.5.x</td>
+<td>HLS 播放器（自研封装）</td>
+</tr>
+<tr>
+<td></td>
+<td>Zustand</td>
+<td>4.x</td>
+<td>前端状态管理（Token / 用户 / 播放进度）</td>
+</tr>
+<tr>
+<td></td>
+<td>Capacitor</td>
+<td>6.x</td>
+<td>iOS + Android 混合打包（一套代码出三端）</td>
+</tr>
+<tr>
+<td><strong>后端</strong></td>
+<td>JeecgBoot</td>
+<td>3.8.x</td>
+<td>Spring Boot 3 + Sa-Token + MyBatis-Plus</td>
+</tr>
+<tr>
+<td></td>
+<td>Java</td>
+<td>21 LTS</td>
+<td>—</td>
+</tr>
+<tr>
+<td></td>
+<td>MySQL</td>
+<td>8.0</td>
+<td>主库</td>
+</tr>
+<tr>
+<td></td>
+<td>Redis</td>
+<td>7.x</td>
+<td>缓存 · Token · 限流 · 订单状态</td>
+</tr>
+<tr>
+<td></td>
+<td>FFmpeg</td>
+<td>6.x</td>
+<td>视频转码（HLS · 多码率 · 封面截取）</td>
+</tr>
+<tr>
+<td><strong>对象存储 &amp; 分发</strong></td>
+<td>阿里云 OSS / S3</td>
+<td>—</td>
+<td>视频直传 · 原图存储</td>
+</tr>
+<tr>
+<td></td>
+<td>阿里云 CDN / CloudFront</td>
+<td>—</td>
+<td>HLS 视频加速（动态签名 URL 防盗链）</td>
+</tr>
+<tr>
+<td><strong>第三方服务</strong></td>
+<td>微信支付 / 支付宝</td>
+<td>—</td>
+<td>官方 SDK</td>
+</tr>
+<tr>
+<td></td>
+<td>阿里云内容安全 / 腾讯云</td>
+<td>—</td>
+<td>云厂商自动审核（鉴黄 / 暴力 / 违禁词）</td>
+</tr>
+<tr>
+<td></td>
+<td>极光推送 / FCM / APNs</td>
+<td>—</td>
+<td>App 推送</td>
+</tr>
+<tr>
+<td></td>
+<td>腾讯云短信 / 阿里云短信</td>
+<td>—</td>
+<td>登录验证码</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>四、交付物 &amp; 工期</h2>
+<h3>交付物</h3>
+<ol>
+<li><strong>全部源代码</strong>（前端 Next.js + Capacitor + 后端 JeecgBoot）</li>
+<li><strong>iOS / Android / H5 三端可运行安装包</strong>（iOS TestFlight + Android APK + H5 预览链接）</li>
+<li><strong>管理后台部署完成</strong>（带 10 条演示数据，可直接上手）</li>
+<li><strong>完整文档</strong>：部署文档 + API 文档（OpenAPI/Swagger）+ 数据库 ER 图 + 开发者 Quick Start</li>
+</ol>
+<h3>工期（8 周）</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>周期</th>
+<th>核心产出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P1 · 需求冻结 + UI 定稿</td>
+<td>W1</td>
+<td>功能清单签字确认 · 高保真 UI 定稿（当前原型即为基础，微调后定稿）</td>
+</tr>
+<tr>
+<td>P2 · 前端基础架构</td>
+<td>W2</td>
+<td>Next.js 项目脚手架搭建 · Capacitor 6 配置（iOS + Android）· Sa-Token 登录前后端打通 · HLS 播放器基础组件封装</td>
+</tr>
+<tr>
+<td>P3 · 播放端核心开发</td>
+<td>W3-W4</td>
+<td>首页 Browse · 视频详情页（4 种解锁）· 搜索 · 用户中心 · 会员中心 · HLS 播放器完整功能（后台播放 / PiP）· SEO SSR/ISR · iOS + Android 打包测试</td>
+</tr>
+<tr>
+<td>P4 · 创作者端开发</td>
+<td>W4-W6</td>
+<td>KYC 认证 · 内容上传 + 自动转码 · 定价设置 · 数据看板 + 分润透明化 · 提现 · 创作者主页</td>
+</tr>
+<tr>
+<td>P5 · 管理后台开发</td>
+<td>W5-W7</td>
+<td>内容审核（云厂商自动审批 + 人工复核）· 订单支付 · 分润结算 · 用户管理 · 内容运营 · 数据看板 · 系统配置 · RBAC 权限</td>
+</tr>
+<tr>
+<td>P6 · 联调 + 测试 + 部署</td>
+<td>W7-W8</td>
+<td>三端全链路联调 · 支付全链路测试（微信 + 支付宝沙箱）· 端到端测试用例执行 · CDN 部署 · App Store 提审辅助 · 最终验收交付</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>五、付款方式</h2>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>比例</th>
+<th>金额 (USD)</th>
+<th>触发条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>签约首付</td>
+<td>50%</td>
+<td>$25,000</td>
+<td>合同签署（含需求冻结 + UI 定稿）</td>
+</tr>
+<tr>
+<td>最终验收 + 源码交付</td>
+<td>50%</td>
+<td>$25,000</td>
+<td>iOS TestFlight + Android APK + H5 + 管理后台全部部署完成 · 7 天验收期无 P0/P1 Bug · 完整文档交付</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>六、不含项（重要）</h2>
+<p>以下内容<strong>不在本报价范围内</strong>，如需另做需单独报价：</p>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>具体内容</th>
+<th>原因</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>❌ AI 编辑器</td>
+<td>AI 剧本生成 / AI 视频合成 / AI 自动剪辑</td>
+<td>用户明确要求不含</td>
+</tr>
+<tr>
+<td>❌ AI 相关功能</td>
+<td>AI 封面生成 / AI 字幕 / AI 自动打标签 / AI 推荐算法</td>
+<td>额外工程量</td>
+</tr>
+<tr>
+<td>❌ 基础设施费用</td>
+<td>阿里云 / AWS / 腾讯云服务器 · S3/OSS 存储 · CDN 流量带宽 · 域名</td>
+<td>运行成本，客户自担</td>
+</tr>
+<tr>
+<td>❌ 支付通道手续费</td>
+<td>微信支付 / 支付宝 / Stripe 每笔 0.6% ~ 3.5%</td>
+<td>支付通道方收取</td>
+</tr>
+<tr>
+<td>❌ App Store 上架费</td>
+<td>Apple Developer $99/年 · Google Play $25 一次性</td>
+<td>平台方收取</td>
+</tr>
+<tr>
+<td>❌ 第三方服务费用</td>
+<td>106 短信验证码 · 阿里云内容安全 API · 极光推送超额部分</td>
+<td>第三方按量付费</td>
+</tr>
+<tr>
+<td>❌ 超出清单的定制</td>
+<td>本文档功能清单之外的新增需求 · 大规模界面改版</td>
+<td>按需报价</td>
+</tr>
+<tr>
+<td>❌ 多语言</td>
+<td>英文 / 日文 / 其他语言版本</td>
+<td>本期仅中文</td>
+</tr>
+<tr>
+<td>❌ 版权视频内容</td>
+<td>提供自有版权短剧 / 与版权方合作洽谈</td>
+<td>客户自担</td>
+</tr>
+<tr>
+<td>❌ 跨境合规咨询</td>
+<td>18+ 内容在不同国家/地区的合规认证 · 法律意见</td>
+<td>法务/合规咨询费</td>
+</tr>
+<tr>
+<td>❌ 长期运营维护</td>
+<td>1 年维护到期后的线上运营支持</td>
+<td>续期 $5,000 / 年</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>附录 A · 关键页面截图</h2>
+<blockquote>
+<p>以下截图基于项目原型生成，最终交付时 UI 细节会根据 UI/UX 设计稿进一步精修。</p>
+</blockquote>
+<h3>A.1 用户端（H5 / iOS / Android 共用同一套 UI）</h3>
+<p><strong>图 1 · 首页 Browse（Hero Banner + 频道 Tab + 卡片网格 + VIP 专区）</strong></p>
+<p><img alt="用户端-首页Browse" src="screenshots/用户端-首页Browse.png" /></p>
+<p><strong>图 2 · 视频详情页（HLS 播放器 + 4 种解锁方式 + 选集列表 + 评论区）</strong></p>
+<p><img alt="用户端-视频详情" src="screenshots/用户端-视频详情.png" /></p>
+<p><strong>图 3 · 会员方案（月 / 季 / 年 3 档，价格后台可配置）</strong></p>
+<p><img alt="用户端-会员方案" src="screenshots/用户端-会员方案.png" /></p>
+<h3>A.2 创作者端（Web + App 内嵌 H5）</h3>
+<p><strong>图 4 · 创作者中心（KYC 状态 + 定价设置 + 剧集管理入口）</strong></p>
+<p><img alt="创作者端-创作者中心" src="screenshots/创作者端-创作者中心.png" /></p>
+<p><strong>图 5 · 创作者主页（用户视角 · 全局解锁 Banner + 分润说明 + 视频列表）</strong></p>
+<p><img alt="创作者端-创作者主页" src="screenshots/创作者端-创作者主页.png" /></p>
+<p><strong>图 6 · 数据看板 &amp; 分润透明化（播放量 / 收入 / 粉丝 + 每笔订单分润明细）</strong></p>
+<p><img alt="创作者端-分润看板" src="screenshots/创作者端-分润看板.png" /></p>
+<h3>A.3 管理后台（JeecgBoot 定制 · Web）</h3>
+<p><strong>图 7 · 审核中心（云厂商自动审批 + 疑似内容人工复核队列 · 鉴黄/暴力/违禁词三维度）</strong></p>
+<p><img alt="管理后台-审核中心" src="screenshots/管理后台-审核中心.png" /></p>
+<p><strong>图 8 · 订单列表（5 种订单类型 · 全链路追踪 · USDT/USDC 链上支付）</strong></p>
+<p><img alt="管理后台-订单列表" src="screenshots/管理后台-订单列表.png" /></p>
+<p><strong>图 9 · 数据看板（GMV / MAU / 创作者数 实时仪表盘 + GMV 趋势 + 解锁方式分布）</strong></p>
+<p><img alt="管理后台-数据看板" src="screenshots/管理后台-数据看板.png" /></p>
+<hr />
+<p><em>文档版本 v2.0 · 生成时间 2026-10-11 · 基于原型 <code>gallery.html</code> + <code>index.html</code> + <code>video.html</code> + <code>creator.html</code> + <code>creator-page.html</code> 功能清单撰写</em></p>
+</body>
+</html>

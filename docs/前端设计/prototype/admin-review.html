@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; }
+  .sidebar { width: 200px; background: #1e293b; color: #e2e8f0; min-height: 760px; }
+  .sidebar .active { background: #dc2626; color: #fff; }
+  .sidebar div { padding: 10px 16px; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; }
+  .sidebar div.active { border-left-color: #fbbf24; }
+  .sidebar .group-title { color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 16px 16px 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f8fafc; text-align: left; padding: 8px 12px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+</style>
+</head>
+<body class="bg-slate-100">
+<div class="flex">
+<div class="sidebar flex-shrink-0">
+  <div class="px-4 py-4 border-b border-slate-700">
+    <div class="text-lg font-black text-amber-400">🍈 榴莲 TV</div>
+    <div class="text-[10px] text-slate-400 mt-1">管理后台 v1.0</div>
+  </div>
+  <div class="group-title">内容管理</div>
+  <div class="active">📋 审核中心</div>
+  <div class="">🎬 视频列表</div>
+  <div class="">📦 订单管理</div>
+  <div class="group-title">运营</div>
+  <div class="">🖼️ Banner 管理</div>
+  <div class="">🏆 排行榜</div>
+  <div class="group-title">用户</div>
+  <div>👤 C 端用户</div>
+  <div>👩‍🎤 创作者</div>
+  <div class="group-title">财务</div>
+  <div class="">💰 分润结算</div>
+  <div>💸 提现审核</div>
+  <div class="group-title">系统</div>
+  <div>⚙️ 参数配置</div>
+  <div>🔐 权限管理</div>
+</div>
+<div class="flex-1 p-6">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">审核中心 · 疑似内容队列</h2>
+      <p class="text-xs text-slate-500 mt-1">云厂商自动审批标记疑似内容，共 <span class="text-red-600 font-bold">12</span> 条待复核</p>
+    </div>
+    <div class="flex gap-2 text-xs">
+      <button class="px-3 py-1.5 bg-white border rounded">全部</button>
+      <button class="px-3 py-1.5 bg-red-500 text-white rounded">疑似鉴黄 7</button>
+      <button class="px-3 py-1.5 bg-yellow-500 text-white rounded">疑似暴力 3</button>
+      <button class="px-3 py-1.5 bg-blue-500 text-white rounded">违禁词 2</button>
+    </div>
+  </div>
+  <div class="card mb-4">
+    <div class="flex gap-5">
+      <div class="w-40 h-28 bg-gradient-to-br from-pink-400 to-red-500 rounded flex items-center justify-center text-white text-xs">视频缩略图</div>
+      <div class="flex-1">
+        <div class="font-bold text-slate-800">暗夜迷情：午夜邂逅 第3集</div>
+        <div class="text-xs text-slate-500 mt-1">创作者 @神秘旅人 · 上传时间 2026-10-11 14:32 · 时长 08:42</div>
+        <div class="flex gap-2 mt-2">
+          <span class="badge badge-red">⚠️ 鉴黄置信度 92%</span>
+          <span class="badge badge-yellow">⚠️ 违禁词: 激情</span>
+        </div>
+        <div class="text-xs text-slate-600 mt-2">云厂商：阿里云内容安全 API · 建议人工复核</div>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button class="px-4 py-2 bg-green-500 text-white rounded text-xs font-bold">✅ 通过</button>
+        <button class="px-4 py-2 bg-red-500 text-white rounded text-xs font-bold">❌ 拒绝</button>
+        <button class="px-4 py-2 bg-slate-500 text-white rounded text-xs font-bold">🔄 打回修改</button>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>视频名称</th><th>创作者</th><th>风险类型</th><th>置信度</th><th>上传时间</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>情迷外滩 第5集</td><td>@都市夜归人</td><td><span class="badge badge-red">鉴黄</span></td><td>87%</td><td>10-11 14:28</td><td><button class="text-blue-600 text-xs">审核 →</button></td></tr>
+        <tr><td>血月传说 第2集</td><td>@古墓派</td><td><span class="badge badge-yellow">暴力</span></td><td>78%</td><td>10-11 14:15</td><td><button class="text-blue-600 text-xs">审核 →</button></td></tr>
+        <tr><td>温泉物语 第1集</td><td>@北海道</td><td><span class="badge badge-red">鉴黄</span></td><td>95%</td><td>10-11 13:52</td><td><button class="text-blue-600 text-xs">审核 →</button></td></tr>
+        <tr><td>都市欲望 第8集</td><td>@霓虹灯下</td><td><span class="badge badge-blue">违禁词</span></td><td>90%</td><td>10-11 13:30</td><td><button class="text-blue-600 text-xs">审核 →</button></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div></body></html>

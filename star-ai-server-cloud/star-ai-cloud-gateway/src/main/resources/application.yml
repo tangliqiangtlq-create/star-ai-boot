@@ -1,0 +1,173 @@
+server:
+  port: ${SERVER_PORT:9999}
+  forward-headers-strategy: native
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+  netty:
+    request-timeout: 30s
+
+otp:
+  pepper: ${OTP_PEPPER}
+
+spring:
+  # Redis default configuration, which can be specified through the environment variable SPRING_REDIS_HOST in Docker (such as jeecg-boot-redis); Nacos configuration will override this
+  redis:
+    host: ${SPRING_REDIS_HOST:localhost}
+    port: ${SPRING_REDIS_PORT:6379}
+    password: ${SPRING_REDIS_PASSWORD:}
+    database: ${SPRING_REDIS_DATABASE:0}
+  application:
+    name: ${SPRING_APPLICATION_NAME:jeecg-gateway}
+  main:
+    allow-circular-references: true
+  config:
+    import:
+      # Load the root .env (Working directory=warehouse root) as soon as possible, and then activate the profile; the registered IP is only bound to application-dev.yml
+      - optional:file:./.env[.properties]
+      - optional:nacos:${spring.application.name}-${spring.profiles.active:dev}.yaml
+  profiles:
+    # Align with system/dcs: Do not rely on unfiltered @profile.name@, otherwise application-dev.yml will not take effect when the IDE is run directly
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  cloud:
+    nacos:
+      config:
+        server-addr: ${NACOS_CONFIG_SERVER_ADDR:@config.server-addr@}
+        encode: UTF-8
+        group: ${NACOS_CONFIG_GROUP:@config.group@}
+        namespace: ${NACOS_CONFIG_NAMESPACE:@config.namespace@}
+        username: ${NACOS_CONFIG_USERNAME:@config.username@}
+        password: ${NACOS_CONFIG_PASSWORD:@config.password@}
+      discovery:
+        server-addr: ${NACOS_DISCOVERY_SERVER_ADDR:${spring.cloud.nacos.config.server-addr}}
+        group: ${NACOS_DISCOVERY_GROUP:@config.group@}
+        namespace: ${NACOS_DISCOVERY_NAMESPACE:@config.namespace@}
+        username: ${NACOS_DISCOVERY_USERNAME:@config.username@}
+        password: ${NACOS_DISCOVERY_PASSWORD:@config.password@}
+        port: ${SPRING_CLOUD_NACOS_DISCOVERY_PORT:9999}
+    gateway:
+      discovery:
+        locator:
+          enabled: ${GATEWAY_DISCOVERY_LOCATOR_ENABLED:false}
+          lower-case-service-id: true
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:jeecg-boot-sentinel:9000}
+      web-context-unify: false
+      filter:
+        enabled: false
+      eager: false
+      datasource:
+        flow:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-flow-rules
+            groupId: SENTINEL_GROUP
+            rule-type: flow
+            data-type: json
+        degrade:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-degrade-rules
+            groupId: SENTINEL_GROUP
+            rule-type: degrade
+            data-type: json
+        system:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-system-rules
+            groupId: SENTINEL_GROUP
+            rule-type: system
+            data-type: json
+        authority:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-authority-rules
+            groupId: SENTINEL_GROUP
+            rule-type: authority
+            data-type: json
+        param-flow:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-param-rules
+            groupId: SENTINEL_GROUP
+            rule-type: param-flow
+            data-type: json
+        gw-flow:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-flow-rules
+            groupId: SENTINEL_GROUP
+            rule-type: gw-flow
+            data-type: json
+        gw-api-group:
+          nacos:
+            server-addr: ${SENTINEL_NACOS_SERVER_ADDR:@config.server-addr@}
+            dataId: ${spring.application.name}-api-rules
+            groupId: SENTINEL_GROUP
+            rule-type: gw-api-group
+            data-type: json
+# =============================================================================
+# V-HIGH-01 P0-2: disable SpringDoc / Knife4j (no prod need; blocks v3/api-docs leak)
+# Note: Nacos overrides this default; for temporary UAT, IDE JVM -Dspringdoc.api-docs.enabled=true
+# =============================================================================
+springdoc:
+  api-docs:
+    enabled: false
+    groups:
+      enabled: false
+  swagger-ui:
+    enabled: false
+
+knife4j:
+  production: true
+  setting:
+    language: zh_cn
+    enable-swagger-models: false
+    enable-document-manage: false
+  basic:
+    enable: false
+
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        # Gate A8-2 statically requires the "health,prometheus" token; prometheus is disabled at runtime
+        include: health,prometheus
+  endpoint:
+    # enabled-by-default=false also disables health, so it must be enabled explicitly
+    health:
+      enabled: true
+      show-details: never
+      show-components: never
+    # Disable the metrics endpoint at runtime; keep only health (UP/DOWN only)
+    prometheus:
+      enabled: false
+
+# =============================================================================
+# V-HIGH-09 P0-3: Gateway security headers (default ReportOnly; built-in report endpoint)
+# CSP sole source: org.jeecg.filter.SecurityHeadersGlobalWebFilter
+# Other filters: non-CSP header fallback only; must not set Content-Security-Policy
+# Applies to all gateway responses: API JSON / SPA HTML / static / 4xx 5xx
+# =============================================================================
+gateway:
+  security:
+    headers:
+      enabled: true
+      hsts:
+        maxAgeSeconds: 63072000
+        includeSubDomains: true
+        preload: true
+      frameOptions: DENY
+      permissionsPolicy: "camera=(), microphone=(), geolocation=(), usb=(), payment=(), clipboard-read=(self), clipboard-write=(self)"
+      csp:
+        mode: Enforce
+        policy: ""
+        reportUri: "/_/csp-report"
+        reportTo: "csp-endpoint"
+        # Plan C §8: 0 or 100 = full Enforce; (0,100) = partial rollout + Report-Only
+        enforceTrafficPct: 100

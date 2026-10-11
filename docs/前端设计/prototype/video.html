@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>榴莲 TV · 视频详情</title>
+<style>
+
+:root {
+  --bg: #0B0A14; --bg-card: #1A1828; --bg-card-hover: #221F35;
+  --border: rgba(255,255,255,0.06); --border-strong: rgba(255,255,255,0.12);
+  --text: #FFFFFF; --text-secondary: #A09DB0; --text-muted: #6B6880;
+  --gold: #F59E0B; --gold-light: #FBBF24;
+  --rose: #F472B6; --rose-deep: #FB7185; --purple: #A78BFA;
+  --green: #34D399; --blue: #60A5FA; --danger: #EF4444;
+  --g-primary: linear-gradient(135deg, #F472B6 0%, #FB7185 50%, #F59E0B 100%);
+  --g-gold: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  --g-purple: linear-gradient(135deg, #A78BFA 0%, #F472B6 100%);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+.phone-frame { width: 390px; height: 844px; background: var(--bg); border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.08), 0 0 0 4px #000; }
+.status-bar { height: 44px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; font-size:14px; font-weight:600; position:relative; z-index:50; }
+.status-bar .notch { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:120px; height:28px; background:#000; border-radius:18px; }
+.status-bar .right { display:flex; gap:6px; font-size:12px; }
+.home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(255,255,255,0.4); border-radius:3px; z-index:60; }
+
+
+.scroll { height: calc(100% - 44px - 8px); overflow-y: auto; padding-bottom: 20px; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+
+/* 播放器区 */
+.player {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #000;
+  overflow: hidden;
+}
+.player-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #4C1D95 0%, #831843 50%, #7C2D12 100%);
+}
+.player-overlay {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.6) 100%);
+}
+.player-controls {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: space-between;
+  padding: 16px;
+}
+.player-top {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.icon-btn {
+  width: 36px; height: 36px;
+  background: rgba(0,0,0,0.5);
+  -webkit-backdrop-filter: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  border: none; color: #fff; cursor: pointer;
+}
+.player-center {
+  display: flex; justify-content: center; align-items: center;
+  font-size: 48px;
+  filter: drop-shadow(0 2px 10px rgba(0,0,0,0.5));
+}
+.player-bottom {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 600;
+}
+.progress {
+  flex: 1; height: 3px; background: rgba(255,255,255,0.25); border-radius: 2px;
+  position: relative;
+}
+.progress-fill {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 35%;
+  background: var(--g-primary);
+  border-radius: 2px;
+}
+
+/* 解锁遮罩（VIP模糊示例） */
+.unlock-mask {
+  position: absolute; inset: 0;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(11,10,20,0.5);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10;
+}
+.unlock-mask .lock-icon {
+  width: 56px; height: 56px;
+  background: rgba(255,255,255,0.15);
+  -webkit-backdrop-filter: none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.unlock-mask .tip {
+  font-size: 13px; color: rgba(255,255,255,0.9);
+  font-weight: 700;
+}
+.unlock-mask .tip-sub {
+  font-size: 11px; color: rgba(255,255,255,0.6);
+  margin-top: 4px;
+}
+
+/* 信息区 */
+.info { padding: 16px 20px; }
+.title { font-size: 18px; font-weight: 900; line-height: 1.25; margin-bottom: 8px; letter-spacing: -0.3px; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.tag {
+  font-size: 10px; font-weight: 600;
+  padding: 4px 10px; border-radius: 100px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.meta-row {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 11px; color: var(--text-muted);
+  margin-bottom: 16px;
+}
+.meta-row .dot { width: 3px; height: 3px; background: var(--text-muted); border-radius: 50%; }
+
+/* 创作者行 */
+.creator-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+.avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--g-purple);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.creator-info { flex: 1; }
+.creator-name { font-size: 13px; font-weight: 800; }
+.creator-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.follow-btn {
+  background: var(--g-primary); color: #fff;
+  border: none; padding: 8px 16px; border-radius: 100px;
+  font-size: 11px; font-weight: 800; cursor: pointer;
+}
+
+/* 解锁选项 */
+.unlock-section { padding: 0 20px; margin-bottom: 20px; }
+.section-label {
+  font-size: 12px; font-weight: 800; color: var(--text-secondary);
+  margin-bottom: 10px; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-label::before {
+  content: ''; width: 3px; height: 12px;
+  background: var(--g-primary); border-radius: 2px;
+}
+.unlock-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.unlock-card:active { border-color: var(--rose); }
+.unlock-card.recommended {
+  border-color: var(--rose);
+  background: linear-gradient(135deg, rgba(244,114,182,0.08), rgba(167,139,250,0.05));
+}
+.unlock-card.recommended::before {
+  content: '推荐'; position: absolute; top: -8px; right: 12px;
+  background: var(--g-primary); color: #fff;
+  font-size: 9px; font-weight: 800; padding: 2px 8px; border-radius: 100px;
+}
+.unlock-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.unlock-card:nth-child(1) .unlock-icon { background: var(--g-gold); }
+.unlock-card:nth-child(2) .unlock-icon { background: var(--g-primary); }
+.unlock-card:nth-child(3) .unlock-icon { background: var(--g-purple); }
+.unlock-text { flex: 1; }
+.unlock-title { font-size: 13px; font-weight: 800; }
+.unlock-desc { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.unlock-price { font-size: 18px; font-weight: 900; color: var(--gold); }
+
+/* 选集 */
+.episodes { padding: 0 20px; margin-bottom: 20px; }
+.ep-grid {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;
+}
+.ep {
+  aspect-ratio: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; color: var(--text-secondary);
+  cursor: pointer; position: relative;
+}
+.ep.current { background: var(--g-primary); color: #fff; border-color: transparent; }
+.ep.locked::after {
+  content: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'; position: absolute; bottom: 2px; right: 4px; font-size: 8px;
+}
+.ep.free { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); color: var(--green); }
+
+/* 底部操作条 */
+.bottom-bar {
+  position: absolute; bottom: 34px; left: 0; right: 0;
+  background: rgba(26,24,40,0.95);
+  background: rgba(26,24,40,0.98);
+  -webkit-backdrop-filter: none;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex; gap: 10px;
+  z-index: 55;
+}
+.bottom-btn {
+  flex: 1; padding: 12px; border-radius: 12px;
+  font-size: 12px; font-weight: 700;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  border: none; cursor: pointer;
+  background: var(--bg-card); color: var(--text-secondary);
+}
+.bottom-btn.primary { background: var(--g-primary); color: #fff; flex: 2; }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="status-bar">
+    <div class="notch"></div>
+    <span>9:41</span>
+    <div class="right"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span><span>🔋</span></div>
+  </div>
+
+  <div class="scroll" style="padding-bottom: 100px;">
+    <!-- 播放器 -->
+    <div class="player">
+      <div class="player-bg"></div>
+      <div class="player-overlay"></div>
+      <div class="unlock-mask">
+        <div class="lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="tip">开通 VIP 解锁完整视频</div>
+        <div class="tip-sub">本集已播放 0:32 · VIP 会员免看全集</div>
+      </div>
+      <div class="player-controls">
+        <div class="player-top">
+          <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg></button>
+          <button class="icon-btn"><svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></button>
+        </div>
+        <div class="player-center"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        <div class="player-bottom">
+          <span>0:32</span>
+          <div class="progress"><div class="progress-fill"></div></div>
+          <span>8:42</span>
+          <button class="icon-btn" style="width:28px;height:28px;font-size:12px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 信息 -->
+    <div class="info">
+      <div class="title">暗夜迷情：午夜邂逅<br>第 3 集 · 雨夜追踪</div>
+      <div class="tags">
+        <span class="tag">🔥 热播</span>
+        <span class="tag">💕 都市爱情</span>
+        <span class="tag">🌙 悬疑</span>
+        <span class="tag">✨ 12集</span>
+      </div>
+      <div class="meta-row">
+        <span>👁 124,582 次观看</span>
+        <span class="dot"></span>
+        <span>⭐ 9.2 (2.1k 评分)</span>
+        <span class="dot"></span>
+        <span>08:42</span>
+      </div>
+
+      <!-- 创作者 -->
+      <div class="creator-row">
+        <div class="avatar">🕵️</div>
+        <div class="creator-info">
+          <div class="creator-name">@神秘旅人</div>
+          <div class="creator-sub">12.4k 粉丝 · 18 部作品</div>
+        </div>
+        <button class="follow-btn">＋ 关注</button>
+      </div>
+    </div>
+
+    <!-- 解锁选项 -->
+    <div class="unlock-section">
+      <div class="section-label">🔓 解锁观看</div>
+      
+      <div class="unlock-card recommended">
+        <div class="unlock-icon"><svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2 19h20l-2-10-5 4-3-6-3 6-5-4-2 10z"/></svg></div>
+        <div class="unlock-text">
+          <div class="unlock-title">开通 VIP 会员</div>
+          <div class="unlock-desc">全站 10,000+ 短剧免看 · 支持 USDT</div>
+        </div>
+        <div class="unlock-price">$9.99<span style="font-size:10px;color:var(--text-muted);font-weight:600;">/月</span></div>
+      </div>
+
+      <div class="unlock-card">
+        <div class="unlock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
+        <div class="unlock-text">
+          <div class="unlock-title">购买本集</div>
+          <div class="unlock-desc">永久解锁 · 高清画质</div>
+        </div>
+        <div class="unlock-price">$3.99</div>
+      </div>
+
+      <div class="unlock-card">
+        <div class="unlock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+        <div class="unlock-text">
+          <div class="unlock-title">购买全集（12集）</div>
+          <div class="unlock-desc">比逐集买省 $14 · 永久解锁</div>
+        </div>
+        <div class="unlock-price">$24.99</div>
+      </div>
+    </div>
+
+    <!-- 选集 -->
+    <div class="episodes">
+      <div class="section-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg> 选集 · 12 集全</div>
+      <div class="ep-grid">
+        <div class="ep free">1</div>
+        <div class="ep free">2</div>
+        <div class="ep current">3</div>
+        <div class="ep locked">4</div>
+        <div class="ep locked">5</div>
+        <div class="ep locked">6</div>
+        <div class="ep locked">7</div>
+        <div class="ep locked">8</div>
+        <div class="ep locked">9</div>
+        <div class="ep locked">10</div>
+        <div class="ep locked">11</div>
+        <div class="ep locked">12</div>
+      </div>
+    </div>
+
+    <div style="height: 20px;"></div>
+  </div>
+
+  <!-- 底部操作条 -->
+  <div class="bottom-bar">
+    <button class="bottom-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg><span>收藏</span></button>
+    <button class="bottom-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span>评论</span></button>
+    <button class="bottom-btn primary"><svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2 19h20l-2-10-5 4-3-6-3 6-5-4-2 10z"/></svg> VIP 解锁全集</button>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>star-ai-boot-parent</artifactId>
+        <groupId>org.jeecgframework.boot</groupId>
+        <version>3.7.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>star-ai-module-generate</artifactId>
+    <packaging>pom</packaging>
+    <name>视频/图片生成微服务</name>
+    <description>视频生成、图片生成、任务调度、进度回调、WebSocket 推送</description>
+    <modules>
+        <module>star-ai-module-generate-api</module>
+        <module>star-ai-module-generate-biz</module>
+    </modules>
+</project>

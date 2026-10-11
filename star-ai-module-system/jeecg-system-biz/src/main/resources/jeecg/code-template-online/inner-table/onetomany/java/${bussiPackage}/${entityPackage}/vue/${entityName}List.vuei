@@ -1,0 +1,510 @@
+<#-- noinspection JSDuplicatedDeclaration,RequiredAttributes,NpmUsedModulesInstalled -->
+<#-- ** Import global utility methods ** -->
+<#--<#include "/common/utils.ftl">-->
+<#include "../../../../../../common/utils.ftl">
+<#-- ** Define global variables ** -->
+<#-- Has query fields -->
+<#assign query_flag=false>
+<#-- Has dropdown query field -->
+<#assign query_field_select=false>
+<#-- Has date query field -->
+<#assign query_field_date=false>
+<#-- Has dict -->
+<#assign list_need_dict=false>
+<#-- Has category dict -->
+<#assign list_need_category=false>
+<#-- Has region selector -->
+<#assign list_need_pca=false>
+<#-- Has user selector -->
+<#assign query_sel_user=false>
+<#-- Has department selector -->
+<#assign query_sel_dep=false>
+<#-- Has multi-select dropdown -->
+<#assign query_sel_multi=false>
+<#-- Has searchable dropdown -->
+<#assign query_sel_search=false>
+<#-- Has region component -->
+<#assign query_field_pca=false>
+<#-- Has category dict tree -->
+<#assign query_sel_cat=false>
+<template>
+  <a-card class="j-inner-table-wrapper" :bordered="false">
+
+    <!-- Query area begin -->
+    <div class="table-page-search-wrapper">
+      <a-form layout="inline">
+        <a-row :gutter="24">
+<#-- Query area loop start -->
+<#assign query_field_index=0>
+<#list columns as po>
+  <#if po.isQuery=='Y'>
+  	<#assign query_field_dictCode="">
+    <#if po.dictTable?default("")?trim?length gt 1>
+      <#assign query_field_dictCode="${po.dictTable},${po.dictText},${po.dictField}">
+    <#elseif po.dictField?default("")?trim?length gt 1>
+      <#assign query_field_dictCode="${po.dictField}">
+    </#if>
+    <#assign query_flag=true>
+    <#-- Define component attributes -->
+    <#assign attr_showTime="show-time date-format=\"YYYY-MM-DD HH:mm:ss\"">
+    <#assign indent="">
+    <#-- Hide query fields with index >= 2 -->
+    <#if query_field_index==2>
+      <#-- Extra indent due to wrapper tag -->
+      <#assign indent="  ">
+          <template v-if="toggleSearchStatus">
+    </#if>
+          <#-- update-begin-author:taoyan date:20220303 for: /issues/3420 Embedded style datetime control styling issue -->
+          <#if po.queryMode?default("")?trim=='group' && po.classType=='datetime'>
+          ${indent}<a-col :xl="10" :lg="12" :md="12" :sm="24">
+          <#else>
+          ${indent}<a-col :xl="6" :lg="7" :md="8" :sm="24">
+          </#if>
+          <#-- update- end-author:taoyan date:20220303 for: /issues/3420 Embedded style datetime control styling issue -->
+            ${indent}<a-form-item label="${po.filedComment}">
+    <#-- Normal query -->
+    <#if po.queryMode=='single'>
+      <#-- Date component -->
+      <#if po.classType=='date'>
+        <#assign query_field_date=true>
+              ${indent}<j-date ${getVModel(po)} ${getPlaceholder(po,"Please select ")}/>
+      <#-- Date-time component -->
+      <#elseif po.classType=='datetime'>
+        <#assign query_field_date=true>
+              ${indent}<j-date ${getVModel(po)} ${getPlaceholder(po,"Please select ")} ${attr_showTime}/>
+      <#-- Dropdown component -->
+      <#elseif po.classType=='list' || po.classType=='radio' || po.classType=='checkbox'>
+        <#assign query_field_select=true>
+        <#-- Dropdown/radio: table dict vs normal dict -->
+        <#if (po.dictTable!"")?trim?length gt 1>
+          ${indent}<j-dict-select-tag ${getVModel(po)} ${getPlaceholder(po,"Please select ")} dictCode="${po.dictTable},${po.dictText},${po.dictField}"/>
+        <#elseif (po.dictField!"")?trim?length gt 1>
+          ${indent}<j-dict-select-tag ${getVModel(po)} ${getPlaceholder(po,"Please select ")} dictCode="${po.dictField}"/>
+        <#else>
+          ${indent}<a-input ${getVModel(po)} ${getPlaceholder(po,"Please enter ")}/>
+        </#if>
+      <#-- User selector component -->
+      <#elseif po.classType=='sel_user'>
+      <#assign query_sel_user=true>
+             ${indent}<j-select-user-by-dep placeholder="Please select ${po.filedComment}" v-model="queryParam.${po.fieldName}"/>
+      <#-- Department selector component -->
+      <#elseif po.classType=='sel_depart'>
+      <#assign query_sel_dep=true>
+             ${indent}<j-select-depart placeholder="Please select ${po.filedComment}" v-model="queryParam.${po.fieldName}"/>
+      <#elseif po.classType=='list_multi'>
+      <#-- Multi-select dropdown component -->
+      <#assign query_sel_multi=true>
+             ${indent}<j-multi-select-tag placeholder="Please select ${po.filedComment}" dictCode="${query_field_dictCode?default("")}" v-model="queryParam.${po.fieldName}"/>
+      <#-- Popup component -->
+      <#elseif po.classType=='popup'>
+             ${indent}<j-popup placeholder="Please select ${po.filedComment}" v-model="queryParam.${po.fieldName}" code="${po.dictTable}" org-fields="${po.dictField}" dest-fields="${po.dictText}" :field="getPopupField('${po.dictText}')" :multi="${po.extendParams.popupMulti?c}"/>
+      <#-- Searchable dropdown -->
+     <#elseif po.classType=='sel_search'>
+     <#assign query_sel_search=true>
+             ${indent}<j-search-select-tag placeholder="Please select ${po.filedComment}" v-model="queryParam.${po.fieldName}" dict="${po.dictTable},${po.dictText},${po.dictField}"/>
+     <#elseif po.classType=='pca'>
+     <#assign query_field_pca=true>
+             ${indent}<j-area-linkage type="cascader" v-model="queryParam.${po.fieldName}" placeholder="Please select province/city/district"/>
+     <#elseif po.classType=='cat_tree'>
+     <#assign query_sel_cat=true>
+             ${indent}<j-category-select placeholder="Please select ${po.filedComment}" v-model="queryParam.${po.fieldName}" pcode="${po.dictField?default("")}"/>
+      <#-- Others use input component -->
+      <#else>
+             ${indent}<a-input ${getVModel(po)} ${getPlaceholder(po,"Please enter ")}/>
+      </#if>
+    <#-- Range query -->
+    <#else>
+      <#-- Date range component -->
+      <#if po.classType=='date'>
+        <#assign query_field_date=true>
+          ${indent}<j-date class="query-group-cust" ${getVModel(po, "_begin")} ${getPlaceholder(po, "Please select start date",false)}/>
+          ${indent}<span class="query-group-split-cust"></span>
+          ${indent}<j-date class="query-group-cust" ${getVModel(po, "_end")} ${getPlaceholder(po, "Please select end date",false)}/>
+      <#-- Date-time range component -->
+      <#elseif po.classType=='datetime'>
+        <#assign query_field_date=true>
+          ${indent}<j-date class="query-group-cust" ${getVModel(po, "_begin")} ${getPlaceholder(po, "Please select start time",false)} ${attr_showTime}/>
+          ${indent}<span class="query-group-split-cust"></span>
+          ${indent}<j-date class="query-group-cust" ${getVModel(po, "_end")} ${getPlaceholder(po, "Please select end time",false)} ${attr_showTime}/>
+      <#-- Others use range input component -->
+      <#else>
+          ${indent}<a-input class="query-group-cust" ${getVModel(po, "_begin")} ${getPlaceholder(po, "Please enter start value",false)}/>
+          ${indent}<span class="query-group-split-cust"></span>
+          ${indent}<a-input class="query-group-cust" ${getVModel(po, "_end")} ${getPlaceholder(po, "Please enter end value",false)}/>
+      </#if>
+    </#if>
+            ${indent}</a-form-item>
+          ${indent}</a-col>
+    <#assign query_field_index=query_field_index+1>
+  </#if>
+  <#-- Check dict requirement -->
+  <#if !list_need_dict && po.fieldShowType != 'popup' && (po.dictField!"")?trim?length gt 1>
+    <#assign list_need_dict=true>
+  </#if>
+  <#-- Check category dict requirement -->
+  <#if po.classType == 'cat_tree' && (po.dictText!"")?trim?length == 0>
+    <#assign list_need_category=true>
+  </#if>
+   <#-- Check region requirement -->
+  <#if po.classType=='pca'>
+  <#assign list_need_pca=true>
+  </#if>
+</#list>
+<#-- Query area loop end -->
+<#if query_field_index gt 2>
+          </template>
+</#if>
+<#if query_flag>
+          <a-col :xl="6" :lg="7" :md="8" :sm="24">
+            <span class="table-page-search-submitButtons table-operator">
+              <a-button type="primary" icon="search" @click="searchQuery">Search</a-button>
+              <a-button type="primary" icon="reload" @click="searchReset">Reset</a-button>
+              <a @click="handleToggleSearch" style="margin-left: 8px">
+                <span>{{ toggleSearchStatus ? 'Collapse' : 'Expand' }}</span>
+                <a-icon :type="toggleSearchStatus ? 'up' : 'down'"/>
+              </a>
+            </span>
+          </a-col>
+</#if>
+        </a-row>
+      </a-form>
+    </div>
+    <!-- Query area end -->
+
+    <!-- Action button area begin -->
+    <div class="table-operator">
+      <a-button type="primary" icon="plus" @click="handleAdd">Add</a-button>
+      <a-button type="primary" icon="download" @click="handleExportXls('${tableVo.ftlDescription}')">Export</a-button>
+      <a-upload name="file" :showUploadList="false" :multiple="false" :headers="tokenHeader" :action="importExcelUrl" @change="handleImportExcel">
+        <a-button type="primary" icon="import">Import</a-button>
+      </a-upload>
+      <!-- Advanced query area -->
+      <j-super-query :fieldList="superFieldList" ref="superQueryModal" @handleSuperQuery="handleSuperQuery"></j-super-query>
+      <a-dropdown v-if="selectedRowKeys.length > 0">
+        <a-menu slot="overlay">
+          <a-menu-item key="1" @click="batchDel">
+            <a-icon type="delete"/>
+            <span>Delete</span>
+          </a-menu-item>
+        </a-menu>
+        <a-button>
+          <span>Batch actions</span>
+          <a-icon type="down"/>
+        </a-button>
+      </a-dropdown>
+    </div>
+    <!-- Action button area end -->
+
+    <!-- Table area begin -->
+    <div>
+
+      <a-alert type="info" showIcon style="margin-bottom: 16px;">
+        <template slot="message">
+          <span>Selected</span>
+          <a style="font-weight: 600;padding: 0 4px;">{{ selectedRowKeys.length }}</a>
+          <span> item(s)</span>
+          <a style="margin-left: 24px" @click="onClearSelected">Clear</a>
+        </template>
+      </a-alert>
+
+      <a-table
+        ref="table"
+        size="middle"
+        bordered
+        rowKey="id"
+        class="j-table-force-nowrap"
+        :scroll="{x:true}"
+        :loading="loading"
+        :columns="columns"
+        :dataSource="dataSource"
+        :pagination="ipagination"
+        :expandedRowKeys="expandedRowKeys"
+        :rowSelection="{selectedRowKeys, onChange: onSelectChange}"
+        @expand="handleExpand"
+        @change="handleTableChange"
+      >
+
+        <!-- Embedded table area begin -->
+        <template slot="expandedRowRender" slot-scope="record">
+          <a-tabs tabPosition="top">
+<#list subTables as sub>
+            <a-tab-pane tab="${sub.ftlDescription}" key="${sub.entityName?uncap_first}" forceRender>
+  <#assign subTableCompName=camelToHorizontal("${sub.entityName?uncap_first}", "lower")/>
+              <${subTableCompName}-sub-table :record="record"/>
+            </a-tab-pane>
+</#list>
+          </a-tabs>
+        </template>
+        <!-- Embedded table area end -->
+
+        <template slot="htmlSlot" slot-scope="text">
+          <div v-html="text"></div>
+        </template>
+
+        <template slot="imgSlot" slot-scope="text,record">
+          <div style="font-size: 12px;font-style: italic;">
+            <span v-if="!text">No image</span>
+            <img v-else :src="getImgView(text)" :preview="record.id" alt="" style="max-width:80px;height:25px;"/>
+          </div>
+        </template>
+
+        <#if list_need_pca>
+        <template slot="pcaSlot" slot-scope="text">
+          <div>{{ getPcaText(text) }}</div>
+        </template>
+        </#if>
+
+        <template slot="fileSlot" slot-scope="text">
+          <span v-if="!text" style="font-size: 12px;font-style: italic;">No file</span>
+          <a-button
+            v-else
+            ghost
+            type="primary"
+            icon="download"
+            size="small"
+            @click="downloadFile(text)"
+          >
+            <span>Download</span>
+          </a-button>
+        </template>
+
+        <template slot="action" slot-scope="text, record">
+          <a @click="handleEdit(record)">Edit</a>
+          <a-divider type="vertical"/>
+          <a-dropdown>
+            <a class="ant-dropdown-link">More <a-icon type="down" /></a>
+            <a-menu slot="overlay">
+              <a-menu-item>
+                <a-popconfirm title="Confirm delete?" @confirm="handleDelete(record.id)">
+                  <a>Delete</a>
+                </a-popconfirm>
+              </a-menu-item>
+            </a-menu>
+          </a-dropdown>
+
+        </template>
+
+      </a-table>
+    </div>
+    <!-- Table area end -->
+
+    <!-- Form area -->
+<#assign modalForm=camelToHorizontal("${entityName?uncap_first}", "lower")/>
+    <${modalForm}-modal ref="modalForm" @ok="modalFormOk"/>
+
+  </a-card>
+</template>
+
+<script>
+
+  import { JeecgListMixin } from '@/mixins/JeecgListMixin'
+  import ${entityName}Modal from './modules/${entityName}Modal'
+<#list subTables as sub>
+  import ${sub.entityName}SubTable from './subTables/${sub.entityName}SubTable'
+</#list>
+<#if query_field_select>
+  import JDictSelectTag from '@/components/dict/JDictSelectTag.vue'
+</#if>
+<#if query_field_date>
+  import JDate from '@/components/jeecg/JDate.vue'
+</#if>
+<#if list_need_dict>
+  import {filterMultiDictText} from '@/components/dict/JDictSelectUtil'
+</#if>
+<#if list_need_category>
+  import { loadCategoryData } from '@/api/api'
+</#if>
+<#if query_sel_user>
+  import JSelectUserByDep from '@/components/jeecgbiz/JSelectUserByDep'
+</#if>
+<#if query_sel_dep>
+  import JSelectDepart from '@/components/jeecgbiz/JSelectDepart'
+</#if>
+<#if query_sel_multi>
+  import JMultiSelectTag from '@/components/dict/JMultiSelectTag'
+</#if>
+<#if query_sel_search>
+  import JSearchSelectTag from '@/components/dict/JSearchSelectTag'
+</#if>
+<#if query_field_pca>
+  import JAreaLinkage from '@comp/jeecg/JAreaLinkage'
+</#if>
+<#if query_sel_cat>
+  import JCategorySelect from '@comp/jeecg/JCategorySelect'
+</#if>
+ <#if list_need_pca>
+  import Area from '@/components/_util/Area'
+  </#if>
+  import '@/assets/less/TableExpand.less'
+
+  export default {
+    name: '${entityName}List',
+    mixins: [JeecgListMixin],
+    components: {
+      ${entityName}Modal,
+<#list subTables as sub>
+      ${sub.entityName}SubTable,
+</#list>
+<#if query_field_date>
+      JDate,
+</#if>
+<#if query_field_select>
+      JDictSelectTag,
+</#if>
+<#if query_sel_user>
+      JSelectUserByDep,
+</#if>
+<#if query_sel_dep>
+      JSelectDepart,
+</#if>
+<#if query_sel_multi>
+      JMultiSelectTag,
+</#if>
+<#if query_sel_search>
+      JSearchSelectTag,
+</#if>
+<#if query_field_pca>
+      JAreaLinkage,
+</#if>
+<#if query_sel_cat>
+      JCategorySelect,
+</#if>
+    },
+    data() {
+      return {
+        description: '${tableVo.ftlDescription} list management page',
+        // Table header
+        columns: [
+          {
+            title: '#',
+            key: 'rowIndex',
+            width: 60,
+            align: 'center',
+            customRender: (t, r, index) => parseInt(index) + 1
+          },
+<#-- Begin iterate table headers -->
+<#list columns as po>
+  <#if po.isShowList == 'Y'>
+          {
+            title: '${po.filedComment}',
+            align: 'center',
+            <#if po.sort=='Y'>
+            sorter: true,
+            </#if>
+    <#if po.classType == 'date'>
+            dataIndex: '${po.fieldName}',
+    <#elseif po.fieldDbType=='Blob'>
+           dataIndex: '${po.fieldName}String'
+    <#elseif po.classType=='umeditor'>
+            dataIndex: '${po.fieldName}',
+            scopedSlots: {customRender: 'htmlSlot'}
+    <#elseif po.classType=='pca'>
+            dataIndex: '${po.fieldName}',
+            scopedSlots: {customRender: 'pcaSlot'}
+    <#elseif po.classType=='file'>
+            dataIndex: '${po.fieldName}',
+            scopedSlots: {customRender: 'fileSlot'}
+    <#elseif po.classType=='image'>
+            dataIndex: '${po.fieldName}',
+            scopedSlots: {customRender: 'imgSlot'}
+    <#elseif po.classType == 'sel_tree' || po.classType=='list' || po.classType=='list_multi' || po.classType=='sel_search' || po.classType=='radio' || po.classType=='checkbox' || po.classType=='sel_depart' || po.classType=='sel_user'>
+            dataIndex: '${po.fieldName}_dictText'
+    <#elseif po.classType=='cat_tree'>
+      <#if list_need_category>
+            dataIndex: '${po.fieldName}',
+            customRender: (text) => (text ? filterMultiDictText(this.dictOptions['${po.fieldName}'], text) : '')
+      <#else>
+            dataIndex: '${po.fieldName}',
+            customRender: (text, record) => (text ? record['${dashedToCamel(po.dictText)}'] : '')
+      </#if>
+    <#elseif po.classType=='switch'>
+            dataIndex: '${po.fieldName}',
+            <#if po.dictField != 'is_open'>
+            customRender: (text) => (!text ? "" : (text == ${po.dictField}[0] ? "Yes" : "No"))
+            <#else>
+            customRender: (text) => (!text ? "" : (text == "Y" ? "Yes" : "No"))
+            </#if>
+    <#else>
+            dataIndex: '${po.fieldName}',
+    </#if>
+          },
+  </#if>
+</#list>
+<#-- End iterate table headers -->
+          {
+            title: 'Actions',
+            dataIndex: 'action',
+            align: 'center',
+            width:147,
+            scopedSlots: { customRender: 'action' },
+          },
+        ],
+        // Dict options
+        dictOptions: {},
+        // Expanded rows test
+        expandedRowKeys: [],
+<#assign urlPrefix="/${entityPackage}/${entityName?uncap_first}">
+        url: {
+          list: '${urlPrefix}/list',
+          delete: '${urlPrefix}/delete',
+          deleteBatch: '${urlPrefix}/deleteBatch',
+          exportXlsUrl: '${urlPrefix}/exportXls',
+          importExcelUrl: '${urlPrefix}/importExcel',
+        },
+        <#if list_need_pca>
+        pcaData:'',
+        </#if>
+        superFieldList:[],
+      }
+    },
+    created() {
+      <#if list_need_pca>
+      this.pcaData = new Area()
+      </#if>
+      this.getSuperFieldList();
+    },
+    computed: {
+      importExcelUrl() {
+        return window._CONFIG['domianURL'] + this.url.importExcelUrl
+      }
+    },
+    methods: {
+     <#if list_need_pca>
+      getPcaText(code){
+        return this.pcaData.getText(code);
+      },
+     </#if>
+      initDictConfig() {
+<#list columns as po>
+  <#if (po.isQuery=='Y' || po.isShowList=='Y') && po.classType!='popup'>
+    <#if po.classType=='cat_tree' && list_need_category==true>
+        loadCategoryData({ code: "${po.dictField?default('')}" }).then((res) => {
+          if (res.success) {
+            this.$set(this.dictOptions, '${po.fieldName}', res.result)
+          }
+        })
+    </#if>
+  </#if>
+</#list>
+      },
+
+      handleExpand(expanded, record) {
+        this.expandedRowKeys = []
+        if (expanded === true) {
+          this.expandedRowKeys.push(record.id)
+        }
+      },
+      getSuperFieldList(){
+        <#include "/common/utils.ftl">
+        let fieldList=[];
+         <#list columns as po>
+        fieldList.push(${superQueryFieldList(po)})
+         </#list>
+        this.superFieldList = fieldList
+      }
+    }
+  }
+</script>
+<style lang="less" scoped>
+  @import '~@assets/less/common.less';
+</style>

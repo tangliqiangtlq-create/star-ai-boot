@@ -1,0 +1,79 @@
+<#include "/common/utils.ftl">
+<#list subTables as sub>
+#segment#${sub.entityName}Modal.vue
+<template>
+  <j-modal :title="title" :width="width" :visible="visible" @ok="handleOk" :okButtonProps="{ class: { 'jee-hidden': disableSubmit } }" @cancel="handleCancel" cancelText="Close">
+      <${sub.entityName}Form ref="registerForm" @ok="submitCallback" :formDisabled="disableSubmit" :formBpm="false"></${sub.entityName}Form>
+  </j-modal>
+</template>
+
+<script lang="ts" setup>
+  import { ref, computed, unref, inject, nextTick, defineExpose } from 'vue';
+  import ${sub.entityName}Form from './${sub.entityName}Form.vue'
+  import JModal from '/@/components/Modal/src/JModal/JModal.vue';
+  
+  const title = ref<string>('');
+  const width = ref<number>(800);
+  const visible = ref<boolean>(false);
+  const disableSubmit = ref<boolean>(false);
+  const registerForm = ref();
+  const emit = defineEmits(['register', 'success']);
+  
+  /**
+   * Add
+   */
+  function add() {
+    title.value = 'Add';
+    visible.value = true;
+    nextTick(() => {
+      registerForm.value.add();
+    });
+  }
+  
+  /**
+   * Edit
+   * @param record
+   */
+  function edit(record) {
+    title.value = disableSubmit.value ? 'Detail' : 'Edit';
+    visible.value = true;
+    nextTick(() => {
+      registerForm.value.edit(record);
+    });
+  }
+  /**
+   * OK button click handler
+   */
+  function handleOk() {
+    registerForm.value.submitForm();
+  }
+  
+  /**
+   * Form save callback
+   */
+  function submitCallback() {
+    handleCancel();
+    emit('success');
+  }
+  
+  /**
+   * Cancel button callback
+   */
+  function handleCancel() {
+    visible.value = false;
+  }
+  
+  defineExpose({
+    add,
+    edit,
+    disableSubmit,
+  });
+</script>
+<style lang="less">
+  /**Hidden style - modal OK button */
+  .jee-hidden {
+    display: none !important;
+  }
+</style>
+<style lang="less" scoped></style>
+</#list>

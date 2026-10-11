@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.jeecg.modules.system.mapper.SysLogMapper">
+
+	<!--Clear all log records-->
+	<delete id="removeAll">
+		DELETE FROM sys_log
+	</delete>
+
+	<!-- C1-4 / B3-4: bounded batch delete (never unbounded full-table DELETE) -->
+	<delete id="deleteBatchBefore">
+		DELETE FROM sys_log
+		WHERE create_time &lt; #{cutoff}
+		LIMIT #{limit}
+	</delete>
+	
+	<!--Get the total number of visits (deduplication by IP)-->
+	<select id="findTotalVisitCount" resultType="long">
+        select count(distinct ip) from sys_log
+        where log_type = 1 and ip is not null and ip &lt;&gt; ''
+    </select>
+
+	<!--Get the total number of visits today (remove duplicates by IP)-->
+    <select id="findTodayVisitCount" resultType="long">
+        select count(distinct ip) from sys_log
+        where log_type = 1 and ip is not null and ip &lt;&gt; ''
+          and create_time &gt;= #{dayStart} and create_time &lt; #{dayEnd}
+    </select>
+    
+	<!--Get the total number of IPs visited today-->
+    <select id="findTodayIp" resultType="long">
+        select count(distinct ip) from sys_log
+        where log_type = 1 and ip is not null and ip &lt;&gt; ''
+          and create_time &gt;= #{dayStart} and create_time &lt; #{dayEnd}
+    </select>
+    
+   	<!--Home page visit statistics (by day + IP deduplication)-->
+    <select id="findVisitCount" resultType="java.util.HashMap">
+       <if test="dbType == 'mysql' || dbType == 'mariadb'  || dbType == 'clickhouse'|| dbType == 'sqlite'">
+         select count(distinct ip) as visit
+        	   ,count(distinct ip) as ip
+        	   ,DATE_FORMAT(create_time, '%Y-%m-%d') as tian
+        	   ,DATE_FORMAT(create_time, '%m-%d') as type
+        	   from sys_log 
+         where log_type = 1 and ip is not null and ip &lt;&gt; ''
+           and create_time &gt;= #{dayStart} and create_time &lt; #{dayEnd}
+         group by tian,type
+         order by tian asc
+       </if>
+       <if test="dbType == 'oracle' || dbType == 'oracle12c' || dbType == 'dm'">
+        select count(distinct ip) as visit
+        	   ,count(distinct ip) as ip
+        	   ,to_char(create_time, 'yyyy-mm-dd') as tian
+        	   ,to_char(create_time, 'mm-dd') as type
+         from sys_log 
+         where log_type = 1 and ip is not null and ip &lt;&gt; ''
+           and create_time &gt;= #{dayStart} and create_time &lt; #{dayEnd}
+         group by to_char(create_time, 'yyyy-mm-dd'),to_char(create_time, 'mm-dd') 
+         order by to_char(create_time, 'yyyy-mm-dd') asc
+       </if>
+      <if test="dbType == 'postgresql' || dbType == 'kingbasees' || dbType == 'zenith'">
+       select count(distinct ip) as visit
+        	   ,count(distinct ip) as ip
+        	   ,to_char(create_time, 'yyyy-mm-dd') as tian
+        	   ,to_char(create_time, 'mm-dd') as type
+         from sys_log 
+         where log_type = 1 and ip is not null and ip &lt;&gt; ''
+           and create_time &gt;= #{dayStart} and create_time &lt; #{dayEnd}
+         group by tian,type 
+         order by tian asc 	   
+     </if>
+     <if test="dbType == 'sqlserver' || dbType == 'sqlserver2005'">
+        select count(distinct ip) as visit
+        	   ,count(distinct ip) as ip
+               ,CONVERT(varchar(100), create_time, 23) as tian
+        	   ,RIGHT(CONVERT(varchar(100), create_time, 23),5) as type
+         from sys_log 
+         where log_type = 1 and ip is not null and ip &lt;&gt; ''
+           and create_time &gt;= #{dayStart} and create_time &lt; #{dayEnd} 
+         group by CONVERT(varchar(100), create_time, 23),RIGHT(CONVERT(varchar(100), create_time, 23),5)  
+         order by CONVERT(varchar(100), create_time, 23) asc	  
+     </if>
+    </select>
+
+</mapper>

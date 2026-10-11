@@ -1,0 +1,167 @@
+server:
+  port: ${SERVER_PORT:7001}
+  forward-headers-strategy: native
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        # prod recommends Secure=true (HTTPS only); local HTTP remains false
+        secure: ${SESSION_COOKIE_SECURE:false}
+  tomcat:
+    uri-encoding: UTF-8
+    remoteip:
+      protocol-header: X-Forwarded-Proto
+      remote-ip-header: X-Real-IP
+      port-header: X-Forwarded-Port
+      host-header: X-Forwarded-Host
+      internal-proxies: ".*"
+
+jeecg:
+  logo-url: https://mpay.xnow.xyz/logo.png
+  kyc:
+    compat:
+      legacy-api-proxy: false
+      double-write-legacy: false
+      read-fallback-legacy: false
+      sys-user-kyc-status-writeback: true
+      # The approval flow starts asynchronously after submission (SubmissionToFlowLauncherListener); the clean field must be turned on, and if it is turned off, it will always stop at AWAITING_APPROVAL and there is nothing to do.
+      flow-launcher-enabled: true
+      legacy-writeback-state-enabled: false
+      new-user-state-init: true
+      legacy-run-enabled: false
+      gray-scale-percent: 0
+      gray-white-list: []
+      gray-black-list: []
+
+otp:
+  # OTP global pepper — MUST be overridden via env OTP_PEPPER in prod (≥32 char random)
+  # NEVER hardcode a real value here; default is used ONLY for local dev smoke tests
+  pepper: ${OTP_PEPPER}
+
+# What to do when Nacos is not ready or the profile configuration coverage error occurs: you must be able to scan the biz module mapper/xml
+# Append classpath*:mapper/**/*.xml to cover the KYC independent mapper directory
+mybatis-plus:
+  mapper-locations: classpath*:org/jeecg/modules/**/xml/*Mapper.xml,classpath*:mapper/**/*.xml
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - com.baomidou.mybatisplus.autoconfigure.DdlAutoConfiguration
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
+  datasource:
+    hikari:
+      # B11-1 Hikari CP defaults — keep connection pool small but responsive.
+      # Nacos jeecg-{profile}.yaml can override any of these keys at runtime.
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAX_POOL_SIZE:30}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MIN_IDLE:8}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:8000}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:60000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      keepalive-time: ${SPRING_DATASOURCE_HIKARI_KEEPALIVE_TIME:120000}
+      # Hikari will log a WARN with stack trace when a connection is held longer than 2s.
+      # Helps find remaining long-transaction hotspots; safe to disable after B11-2 stabilizes.
+      leak-detection-threshold: ${SPRING_DATASOURCE_HIKARI_LEAK_DETECTION_THRESHOLD:2000}
+      validation-timeout: ${SPRING_DATASOURCE_HIKARI_VALIDATION_TIMEOUT:5000}
+      # Use READ_COMMITTED instead of the MySQL default REPEATABLE_READ —
+      # reduces gap-lock / next-key-lock contention during bulk writes.
+      transaction-isolation: ${SPRING_DATASOURCE_HIKARI_TX_ISOLATION:TRANSACTION_READ_COMMITTED}
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST:}
+    port: ${SPRING_RABBITMQ_PORT:5672}
+    username: ${SPRING_RABBITMQ_USERNAME:}
+    password: ${SPRING_RABBITMQ_PASSWORD:}
+    # ============ I3 MQ vhost isolation (I-class §4 2026-09-27) ============
+    # Production: one vhost per service module; no shared/default vhost
+    # vhost name: /mightyPay/{serviceName}, serviceName∈{system,dcs,process,xxljob,gateway}
+    # Dedicated RabbitMQ user per vhost (own queues/exchanges only)
+    # env: SPRING_RABBITMQ_VIRTUAL_HOST; Nacos injects per-service DataId
+    # Runbook: docs/安全问题修复/第二轮/I-消息-MQ-邮件-OTP链路/I类-vhost隔离Runbook-v1.0.md
+    virtual-host: ${SPRING_RABBITMQ_VIRTUAL_HOST:/}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: 50
+        default-requeue-rejected: false
+  profiles:
+    # Do not rely on @profile.name@ that has not been filtered by Maven resources (if the IDE is run directly, it will remain intact, resulting in the wrong Nacos DataId)
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  application:
+    name: ${SPRING_APPLICATION_NAME:jeecg-system}
+  cloud:
+    nacos:
+      config:
+        server-addr: ${NACOS_CONFIG_SERVER_ADDR:127.0.0.1:8848}
+        # When Windows defaults to GBK, not setting encode will cause the pulled UTF-8 YAML parsing to report MalformedInputException.
+        encode: UTF-8
+        group: ${NACOS_CONFIG_GROUP:DEFAULT_GROUP}
+        namespace: ${NACOS_CONFIG_NAMESPACE:}
+        username: ${NACOS_CONFIG_USERNAME:}
+        password: ${NACOS_CONFIG_PASSWORD:}
+      discovery:
+        server-addr: ${NACOS_DISCOVERY_SERVER_ADDR:${spring.cloud.nacos.config.server-addr}}
+        group: ${NACOS_DISCOVERY_GROUP:DEFAULT_GROUP}
+        namespace: ${NACOS_DISCOVERY_NAMESPACE:}
+        username: ${NACOS_DISCOVERY_USERNAME:}
+        password: ${NACOS_DISCOVERY_PASSWORD:}
+  config:
+    import:
+      # Local multi-network card registration IP, etc. are only visible in application-dev.yml (root directory .env)
+      - optional:nacos:jeecg.yaml
+      - optional:nacos:jeecg-${spring.profiles.active:dev}.yaml
+
+# =============================================================================
+# V-HIGH-01 P0-2: disable SpringDoc / Knife4j (no prod need; blocks v3/api-docs leak)
+# Note: Nacos overrides this default; for temporary UAT, IDE JVM -Dspringdoc.api-docs.enabled=true
+# =============================================================================
+springdoc:
+  api-docs:
+    enabled: false
+    groups:
+      enabled: false
+  swagger-ui:
+    enabled: false
+
+knife4j:
+  production: true
+  setting:
+    language: zh_cn
+    enable-swagger-models: false
+    enable-document-manage: false
+  basic:
+    enable: false
+
+crypto:
+  aes:
+    mode: AES-256-GCM-SIV
+  pbkdf2:
+    iterations: 600000
+
+# =============================================================================
+# M-1: Actuator hardening — mirror Gateway's safe defaults (Spring Boot 3.3.11)
+# Default exposure in Boot 3.x includes health/info/metrics/prometheus. We
+# also want shutdown + heapdump + threaddump DISABLED (heapdump leaks secrets).
+# =============================================================================
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        # Expose health only; info/metrics/prometheus are withheld to prevent metric/build-info leakage
+        include: health
+  endpoint:
+    # enabled-by-default=false also disables health, so it must be enabled explicitly or probes get 404
+    health:
+      enabled: true
+      show-details: never
+      show-components: never
+    shutdown:
+      enabled: false

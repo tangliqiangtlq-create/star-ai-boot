@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; }
+  .sidebar { width: 200px; background: #1e293b; color: #e2e8f0; min-height: 760px; }
+  .sidebar .active { background: #dc2626; color: #fff; }
+  .sidebar div { padding: 10px 16px; font-size: 13px; cursor: pointer; border-left: 3px solid transparent; }
+  .sidebar div.active { border-left-color: #fbbf24; }
+  .sidebar .group-title { color: #94a3b8; font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 16px 16px 4px; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { background: #f8fafc; text-align: left; padding: 8px 12px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
+  td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; }
+  .badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #dcfce7; color: #166534; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef9c3; color: #854d0e; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .card { background: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+</style>
+</head>
+<body class="bg-slate-100">
+<div class="flex">
+<div class="sidebar flex-shrink-0">
+  <div class="px-4 py-4 border-b border-slate-700">
+    <div class="text-lg font-black text-amber-400">🍈 榴莲 TV</div>
+    <div class="text-[10px] text-slate-400 mt-1">管理后台 v1.0</div>
+  </div>
+  <div class="group-title">内容管理</div>
+  <div class="">📋 审核中心</div>
+  <div class="">🎬 视频列表</div>
+  <div class="active">📦 订单管理</div>
+  <div class="group-title">运营</div>
+  <div class="">🖼️ Banner 管理</div>
+  <div class="">🏆 排行榜</div>
+  <div class="group-title">用户</div>
+  <div>👤 C 端用户</div>
+  <div>👩‍🎤 创作者</div>
+  <div class="group-title">财务</div>
+  <div class="">💰 分润结算</div>
+  <div>💸 提现审核</div>
+  <div class="group-title">系统</div>
+  <div>⚙️ 参数配置</div>
+  <div>🔐 权限管理</div>
+</div>
+<div class="flex-1 p-6">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h2 class="text-xl font-bold text-slate-800">订单管理</h2>
+      <p class="text-xs text-slate-500 mt-1">今日订单 <span class="text-amber-600 font-bold">186</span> 笔 · GMV <span class="text-amber-600 font-bold">$8,432</span></p>
+    </div>
+    <div class="flex gap-2 text-xs">
+      <input placeholder="订单号/用户ID" class="px-3 py-1.5 border rounded w-48">
+      <select class="px-3 py-1.5 border rounded"><option>全部类型</option><option>VIP开通</option><option>单集购买</option><option>剧集打包</option></select>
+      <select class="px-3 py-1.5 border rounded"><option>全部状态</option><option>已支付</option><option>已退款</option></select>
+      <button class="px-3 py-1.5 bg-red-500 text-white rounded">导出</button>
+    </div>
+  </div>
+  <div class="grid grid-cols-4 gap-4 mb-5">
+    <div class="card text-center py-4"><div class="text-xs text-slate-500">今日 GMV</div><div class="text-2xl font-black text-amber-600 mt-1">$8,432</div></div>
+    <div class="card text-center py-4"><div class="text-xs text-slate-500">今日订单</div><div class="text-2xl font-black text-green-600 mt-1">186</div></div>
+    <div class="card text-center py-4"><div class="text-xs text-slate-500">平台抽成</div><div class="text-2xl font-black text-red-600 mt-1">$2,951</div></div>
+    <div class="card text-center py-4"><div class="text-xs text-slate-500">创作者分成</div><div class="text-2xl font-black text-blue-600 mt-1">$5,481</div></div>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>订单号</th><th>用户</th><th>类型</th><th>金额</th><th>平台抽成</th><th>创作者分成</th><th>支付方式</th><th>状态</th><th>时间</th></tr></thead>
+      <tbody>
+        <tr><td class="font-mono text-[11px]">ORD-20261011-88321</td><td>u_10086</td><td><span class="badge badge-blue">VIP年卡</span></td><td>$99.99</td><td>$34.99</td><td>$65.00</td><td>USDT-TRC20</td><td><span class="badge badge-green">已支付</span></td><td>14:32</td></tr>
+        <tr><td class="font-mono text-[11px]">ORD-20261011-88320</td><td>u_10234</td><td><span class="badge badge-green">剧集打包</span></td><td>$24.99</td><td>$8.75</td><td>$16.24</td><td>USDC-ERC20</td><td><span class="badge badge-green">已支付</span></td><td>14:28</td></tr>
+        <tr><td class="font-mono text-[11px]">ORD-20261011-88319</td><td>u_08721</td><td><span class="badge badge-yellow">单集购买</span></td><td>$3.99</td><td>$1.40</td><td>$2.59</td><td>USDT-BSC</td><td><span class="badge badge-green">已支付</span></td><td>14:15</td></tr>
+        <tr><td class="font-mono text-[11px]">ORD-20261011-88318</td><td>u_11002</td><td><span class="badge badge-blue">VIP月卡</span></td><td>$9.99</td><td>$3.50</td><td>$6.49</td><td>USDT-TRC20</td><td><span class="badge badge-red">已退款</span></td><td>13:52</td></tr>
+        <tr><td class="font-mono text-[11px]">ORD-20261011-88317</td><td>u_09981</td><td><span class="badge badge-green">剧集打包</span></td><td>$18.99</td><td>$6.65</td><td>$12.34</td><td>USDC-ERC20</td><td><span class="badge badge-green">已支付</span></td><td>13:30</td></tr>
+        <tr><td class="font-mono text-[11px]">ORD-20261011-88316</td><td>u_10456</td><td><span class="badge badge-yellow">单集购买</span></td><td>$4.99</td><td>$1.75</td><td>$3.24</td><td>USDT-TRC20</td><td><span class="badge badge-green">已支付</span></td><td>13:12</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</div></body></html>

@@ -1,0 +1,139 @@
+import {defHttp} from '/@/utils/http/axios';
+import { useMessage } from "/@/hooks/web/useMessage";
+
+const { createConfirm } = useMessage();
+
+enum Api {
+  list = '/${entityPackage}/${entityName?uncap_first}/list',
+  save= '/${entityPackage}/${entityName?uncap_first}/add',
+  edit= '/${entityPackage}/${entityName?uncap_first}/edit',
+  deleteOne = '/${entityPackage}/${entityName?uncap_first}/delete',
+  deleteBatch = '/${entityPackage}/${entityName?uncap_first}/deleteBatch',
+  importExcel = '/${entityPackage}/${entityName?uncap_first}/importExcel',
+  exportXls = '/${entityPackage}/${entityName?uncap_first}/exportXls',
+<#list subTables as sub><#rt/>
+  ${sub.entityName?uncap_first}List = '/${entityPackage}/${entityName?uncap_first}/list${sub.entityName}ByMainId',
+  ${sub.entityName?uncap_first}Save= '/${entityPackage}/${entityName?uncap_first}/add${sub.entityName}',
+  ${sub.entityName?uncap_first}Edit= '/${entityPackage}/${entityName?uncap_first}/edit${sub.entityName}',
+  ${sub.entityName?uncap_first}Delete = '/${entityPackage}/${entityName?uncap_first}/delete${sub.entityName}',
+  ${sub.entityName?uncap_first}DeleteBatch = '/${entityPackage}/${entityName?uncap_first}/deleteBatch${sub.entityName}',
+</#list>
+}
+/**
+ * Export API
+ * @param params
+ */
+export const getExportUrl = Api.exportXls;
+
+/**
+ * Import API
+ */
+export const getImportUrl = Api.importExcel;
+
+/**
+ * List API
+ * @param params
+ */
+export const list = (params) =>
+  defHttp.get({ url: Api.list, params });
+
+/**
+ * Delete single record
+ */
+export const deleteOne = (params,handleSuccess) => {
+  return defHttp.delete({ url: Api.deleteOne, params }, { joinParamsToUrl: true }).then(() => {
+    handleSuccess();
+  });
+}
+
+/**
+ * Batch delete
+ * @param params
+ */
+export const batchDelete = (params, handleSuccess) => {
+  createConfirm({
+    iconType: 'warning',
+    title: 'ConfirmDelete',
+    content: 'Delete selected data?',
+    okText: 'Confirm',
+    cancelText: 'Cancel',
+    onOk: () => {
+      return defHttp.delete({ url: Api.deleteBatch, data: params }, { joinParamsToUrl: true }).then(() => {
+        handleSuccess();
+      });
+    }
+  });
+}
+
+/**
+ * Save or update
+ * @param params
+ */
+export const saveOrUpdate = (params, isUpdate) => {
+  let url = isUpdate ? Api.edit : Api.save;
+  return defHttp.post({ url: url, params },{ isTransformResponse: false });
+}
+<#list subTables as sub><#rt/>
+  <#assign myForeignKeys=''>
+  <#list sub.foreignKeys as key>
+    <#assign myForeignKeys='${key?uncap_first}'>
+  </#list>
+  
+/**
+ * List API
+ * @param params
+ */
+export const ${sub.entityName?uncap_first}List = (params) => {
+  if(params['${myForeignKeys}']){
+    return defHttp.get({ url: Api.${sub.entityName?uncap_first}List, params });
+  }
+  return Promise.resolve({});
+}
+
+/**
+ * Delete single record
+ */
+export const ${sub.entityName?uncap_first}Delete = (params,handleSuccess) => {
+  return defHttp.delete({ url: Api.${sub.entityName?uncap_first}Delete, params }, { joinParamsToUrl: true }).then(() => {
+    handleSuccess();
+  });
+}
+
+/**
+ * Batch delete
+ * @param params
+ */
+export const ${sub.entityName?uncap_first}DeleteBatch = (params, handleSuccess) => {
+  createConfirm({
+    iconType: 'warning',
+    title: 'ConfirmDelete',
+    content: 'Delete selected data?',
+    okText: 'Confirm',
+    cancelText: 'Cancel',
+    onOk: () => {
+      return defHttp.delete({ url: Api.${sub.entityName?uncap_first}DeleteBatch, data: params }, { joinParamsToUrl: true }).then(() => {
+        handleSuccess();
+      });
+    }
+  });
+}
+
+/**
+ * Save or update
+ * @param params
+ */
+export const  ${sub.entityName?uncap_first}SaveOrUpdate = (params, isUpdate) => {
+  let url = isUpdate ? Api.${sub.entityName?uncap_first}Edit : Api.${sub.entityName?uncap_first}Save;
+  return defHttp.post({ url: url, params },{ isTransformResponse: false });
+}
+
+/**
+ * Import
+ */
+export const ${sub.entityName?uncap_first}ImportUrl = '/${entityPackage}/${entityName?uncap_first}/import${sub.entityName}'
+
+/**
+ * Export
+ */
+export const ${sub.entityName?uncap_first}ExportXlsUrl = '/${entityPackage}/${entityName?uncap_first}/export${sub.entityName}'
+</#list>

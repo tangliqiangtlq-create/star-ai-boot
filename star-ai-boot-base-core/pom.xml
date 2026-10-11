@@ -1,0 +1,417 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>org.jeecgframework.boot</groupId>
+    <artifactId>jeecg-boot-parent</artifactId>
+    <version>3.7.0</version>
+  </parent>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${lombok.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>star-ai-boot-base-core</artifactId>
+
+  <repositories>
+    <repository>
+      <id>aliyun</id>
+      <name>aliyun Repository</name>
+      <url>https://maven.aliyun.com/repository/public</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>jeecg</id>
+      <name>jeecg Repository</name>
+      <url>https://maven.jeecg.org/nexus/content/repositories/jeecg</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>jeecg-snapshots</id>
+      <name>jeecg-snapshots Repository</name>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!--jeecg-tools-->
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>jeecg-boot-common</artifactId>
+    </dependency>
+
+
+    <!--Integrate springmvc framework and realize automatic configuration-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <!-- websocket -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aop</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <!--springboot2.3+ needs to introduce the verification corresponding package-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <!--springboot2.6+ solves the problem that the metrics endpoint does not display jvm information-->
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+
+    <!-- commons -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
+    <!-- freemarker -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-freemarker</artifactId>
+    </dependency>
+
+    <!-- E7 SVG sanitizer: Jsoup XML/DOM parser (jsoup 1.17.2 available offline at ~/.m2) -->
+    <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.17.2</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>com.auth0</groupId>
+      <artifactId>java-jwt</artifactId>
+    </dependency>
+
+
+    <!-- mybatis-plus -->
+    <dependency>
+      <groupId>com.baomidou</groupId>
+      <artifactId>mybatis-plus-boot-starter</artifactId>
+      <version>${mybatis-plus.version}</version>
+    </dependency>
+
+    <!--druid (Spring Boot 3 must use boot3 starter, otherwise the old class pointed to by autoconfigure.exclude is not valid @AutoConfiguration)-->
+    <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid-spring-boot-3-starter</artifactId>
+      <version>${druid.version}</version>
+    </dependency>
+
+    <!--dynamic data source-->
+    <dependency>
+      <groupId>com.baomidou</groupId>
+      <artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
+      <version>${dynamic-datasource-spring-boot-starter.version}</version>
+    </dependency>
+
+    <!--Database driven-->
+    <!--mysql (com.mysql:mysql-connector-j — mysql.version; CVE-2023-22102, CVE-2022-21363) -->
+    <dependency>
+      <groupId>com.mysql</groupId>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>${mysql.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!--  sqlserver-->
+    <dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>sqljdbc4</artifactId>
+      <version>${sqljdbc4.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!--postgresql driver-->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>${postgresql.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!--NPC Jincang driver version number V008R006C005B0013-->
+    <dependency>
+      <groupId>org.jeecgframework</groupId>
+      <artifactId>kingbase8</artifactId>
+      <version>${kingbase8.version}</version>
+      <scope>runtime</scope>
+    </dependency>
+    <!--Dameng database driver version number 1-3-26-2023.07.26-197096-20046-ENT-->
+    <dependency>
+      <groupId>com.dameng</groupId>
+      <artifactId>Dm8JdbcDriver18</artifactId>
+      <version>${dm8.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.dameng</groupId>
+      <artifactId>DmDialect-for-hibernate5.0</artifactId>
+      <version>${dm8.version}</version>
+    </dependency>
+
+    <!--Quartz scheduled tasks-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-quartz</artifactId>
+    </dependency>
+
+
+    <!--Sa-Token authority authentication, online documentation: https://sa-token.cc-->
+    <dependency>
+      <groupId>cn.dev33</groupId>
+      <artifactId>sa-token-spring-boot3-starter</artifactId>
+    </dependency>
+
+    <!--Sa-Token integrates Redis (using jdk default serialization method)-->
+    <dependency>
+      <groupId>cn.dev33</groupId>
+      <artifactId>sa-token-redis-jackson</artifactId>
+    </dependency>
+
+    <!--Provide Redis connection pool-->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-pool2</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>cn.dev33</groupId>
+      <artifactId>sa-token-jwt</artifactId>
+    </dependency>
+
+    <!--B2 Sa-Token AOP interceptor for @SaCheckLogin / @SaCheckPermission / @SaCheckRole annotations on Spring MVC controllers. Without this dep all annotations are silently no-ops (High).-->
+    <dependency>
+      <groupId>cn.dev33</groupId>
+      <artifactId>sa-token-spring-aop</artifactId>
+      <version>${sa-token.version}</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>com.github.xiaoymin</groupId>
+      <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+      <version>${knife4j-spring-boot-starter.version}</version>
+    </dependency>
+    <!--Swagger 1.x annotations are temporarily retained to be compatible with existing controllers/VOs, and will be migrated to OpenAPI 3 annotations later.-->
+    <dependency>
+      <groupId>io.swagger</groupId>
+      <artifactId>swagger-annotations</artifactId>
+      <version>1.6.15</version>
+    </dependency>
+
+    <!--code generator-->
+    <!--If the download fails, please refer to this document https://help.jeecg.com/java/setup/maven.html-->
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>codegenerate</artifactId>
+      <version>${codegenerate.version}</version>
+    </dependency>
+
+    <!--AutoPoi Excel tool class (2.x starter has been adapted to POI 5.x/Jakarta, the package name is exactly the same as 1.4.x autopoi-web)-->
+    <dependency>
+      <groupId>org.jeecgframework</groupId>
+      <artifactId>autopoi-spring-boot-3-starter</artifactId>
+      <version>${autopoi-web.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-codec</groupId>
+          <artifactId>commons-codec</artifactId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <!--autopoi 2.0.5 passes POI 5.5.1; after exclusion, the root pom is explicitly managed ${poi.version}-->
+        <exclusion>
+          <groupId>org.apache.poi</groupId>
+          <artifactId>poi</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.poi</groupId>
+          <artifactId>poi-ooxml</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.apache.poi</groupId>
+          <artifactId>poi-scratchpad</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-scratchpad</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>xerces</groupId>
+      <artifactId>xercesImpl</artifactId>
+      <version>2.12.2</version>
+      <optional>true</optional>
+    </dependency>
+
+    <!--mini file storage service-->
+    <dependency>
+      <groupId>io.minio</groupId>
+      <artifactId>minio</artifactId>
+    </dependency>
+    <!--Guava: Parent POM unified management version, covering 29.0-jre (CVE-2023-2976, etc.) declared by minio; explicit declaration facilitates SCA identification-->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+
+    <!--Alibaba Cloud SMS-->
+    <dependency>
+      <groupId>com.aliyun</groupId>
+      <artifactId>aliyun-java-sdk-dysmsapi</artifactId>
+      <version>${aliyun-java-sdk-dysmsapi.version}</version>
+    </dependency>
+    <!-- aliyun oss -->
+    <dependency>
+      <groupId>com.aliyun.oss</groupId>
+      <artifactId>aliyun-sdk-oss</artifactId>
+      <version>${aliyun.oss.version}</version>
+    </dependency>
+    <!--Third party login-->
+    <dependency>
+      <groupId>com.xkcoding.justauth</groupId>
+      <artifactId>justauth-spring-boot-starter</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+    </dependency>
+    <!--Solve the problem that okhttp references kotlin and there is a warning log when the application starts-->
+    <dependency>
+      <groupId>com.fasterxml.jackson.module</groupId>
+      <artifactId>jackson-module-kotlin</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>commons-fileupload</groupId>
+      <artifactId>commons-fileupload</artifactId>
+    </dependency>
+    <!--loadhutool-->
+    <dependency>
+      <groupId>cn.hutool</groupId>
+      <artifactId>hutool-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cn.hutool</groupId>
+      <artifactId>hutool-crypto</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cn.hutool</groupId>
+      <artifactId>hutool-json</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>cn.hutool</groupId>
+      <artifactId>hutool-jwt</artifactId>
+    </dependency>
+
+    <!-- chatgpt -->
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>jeecg-boot-starter-chatgpt</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-lang</groupId>
+          <artifactId>commons-lang</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+
+    <!--RabbitMQ (replaces the original RocketMQ)-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-amqp</artifactId>
+    </dependency>
+    <!--classpath scan @RocketMQMessageListener / @RocketMQTopic-->
+    <dependency>
+      <groupId>org.reflections</groupId>
+      <artifactId>reflections</artifactId>
+      <version>0.10.2</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-openfeign</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.xuxueli</groupId>
+      <artifactId>xxl-job-core</artifactId>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>jeecg-boot-starter-lock</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>jeecg-boot-starter-cloud</artifactId>
+    </dependency>
+    <!--G07 secrets backend: AESGCM/KMS decryption of /run/secrets into the Spring Environment-->
+    <dependency>
+      <groupId>org.jeecgframework.boot</groupId>
+      <artifactId>star-ai-boot-starter-secrets</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+  </dependencies>
+</project>

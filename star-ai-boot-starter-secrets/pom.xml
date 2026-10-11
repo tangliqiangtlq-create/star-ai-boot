@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jeecgframework.boot</groupId>
+    <artifactId>jeecg-boot-parent</artifactId>
+    <version>3.7.0</version>
+  </parent>
+
+  <artifactId>star-ai-boot-starter-secrets</artifactId>
+  <name>star-ai-boot-starter-secrets</name>
+  <description>
+    G07 secrets backend (AESGCM / KMS decryption into the Spring Environment).
+    Deliberately servlet-free and framework-free so that it can be shared by the WebMvc services
+    (via star-ai-boot-base-core) and by the WebFlux Spring Cloud Gateway, which must not depend on
+    star-ai-boot-base-core because that module pulls spring-boot-starter-web/mybatis/druid.
+  </description>
+
+  <dependencies>
+    <!--
+      Both are always present inside a Spring Boot application; 'provided' keeps this artifact
+      dependency-light and prevents it from dragging a Spring version into the gateway.
+    -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

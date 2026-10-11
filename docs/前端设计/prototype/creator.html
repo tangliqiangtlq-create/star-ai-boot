@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>榴莲 TV · 创作者中心</title>
+<style>
+
+:root {
+  --bg: #0B0A14; --bg-card: #1A1828; --bg-card-hover: #221F35;
+  --border: rgba(255,255,255,0.06); --border-strong: rgba(255,255,255,0.12);
+  --text: #FFFFFF; --text-secondary: #A09DB0; --text-muted: #6B6880;
+  --gold: #F59E0B; --gold-light: #FBBF24;
+  --rose: #F472B6; --rose-deep: #FB7185; --purple: #A78BFA;
+  --green: #34D399; --blue: #60A5FA; --danger: #EF4444;
+  --g-primary: linear-gradient(135deg, #F472B6 0%, #FB7185 50%, #F59E0B 100%);
+  --g-gold: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  --g-purple: linear-gradient(135deg, #A78BFA 0%, #F472B6 100%);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+.phone-frame { width: 390px; height: 844px; background: var(--bg); border-radius: 44px; overflow: hidden; position: relative; box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.08), 0 0 0 4px #000; }
+.status-bar { height: 44px; display:flex; align-items:center; justify-content:space-between; padding:0 24px; font-size:14px; font-weight:600; position:relative; z-index:50; }
+.status-bar .notch { position:absolute; top:8px; left:50%; transform:translateX(-50%); width:120px; height:28px; background:#000; border-radius:18px; }
+.status-bar .right { display:flex; gap:6px; font-size:12px; }
+.home-indicator { position:absolute; bottom:8px; left:50%; transform:translateX(-50%); width:134px; height:5px; background:rgba(255,255,255,0.4); border-radius:3px; z-index:60; }
+.scroll {{ height: calc(100% - 44px - 8px); overflow-y: auto; padding-bottom: 20px; scrollbar-width: none; }}
+.scroll::-webkit-scrollbar {{ display: none; }}
+.tab-bar {{ position:absolute; bottom:34px; left:0; right:0; height:56px; background:rgba(26,24,40,0.85); background:rgba(26,24,40,0.98);
+  -webkit-backdrop-filter:none; border-top:1px solid var(--border); display:flex; padding-bottom:4px; z-index:55; }}
+.tab-item {{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:9px; color:var(--text-muted); }}
+.tab-item.active {{ color:var(--rose); }}
+.tab-item .icon {{ font-size:22px; line-height:1; }}
+.icon-btn {{ width:36px; height:36px; background:rgba(255,255,255,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; border:none; color:#fff; cursor:pointer; }}
+.section-label {{ font-size:12px; font-weight:800; color:var(--text-secondary); margin-bottom:10px; display:flex; align-items:center; gap:6px; letter-spacing:0.5px; }}
+.section-label::before {{ content:''; width:3px; height:12px; background:var(--g-primary); border-radius:2px; }}
+
+
+/* 顶栏 */
+.top-bar { padding: 0 20px 14px; display:flex; align-items:center; gap:12px; }
+.top-title { flex:1; font-size:18px; font-weight:900; background: var(--g-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* KYC 状态卡 */
+.kyc-card {
+  margin: 0 20px 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #064E3B 0%, #065F46 100%);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 16px;
+  display: flex; align-items: center; gap: 14px;
+  position: relative; overflow: hidden;
+}
+.kyc-card::after { content:''; position:absolute; right:-20px; top:-20px; width:80px; height:80px; background:radial-gradient(circle, rgba(52,211,153,0.3) 0%, transparent 70%); }
+.kyc-icon { width:44px; height:44px; border-radius:12px; background:rgba(52,211,153,0.2); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.kyc-info { flex:1; position:relative; z-index:1; }
+.kyc-title { font-size:13px; font-weight:800; color:#fff; }
+.kyc-sub { font-size:10px; color:rgba(255,255,255,0.7); margin-top:2px; }
+.kyc-badge { background: rgba(52,211,153,0.2); color: var(--green); font-size:10px; font-weight:700; padding:3px 10px; border-radius:100px; }
+
+/* 数据概览卡 */
+.stats { margin: 0 20px 20px; }
+.stat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+}
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 12px; text-align: center;
+}
+.stat-label { font-size: 10px; color: var(--text-muted); }
+.stat-value { font-size: 18px; font-weight: 900; color: var(--gold); margin-top: 4px; }
+.stat-change { font-size: 9px; color: var(--green); font-weight: 700; margin-top: 2px; }
+
+/* 可提现卡 */
+.withdraw-card {
+  margin: 0 20px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px;
+}
+.withdraw-header { display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; }
+.withdraw-title { font-size:14px; font-weight:800; }
+.withdraw-btn {
+  background: var(--g-primary); color:#fff; border:none;
+  padding: 8px 16px; border-radius: 100px;
+  font-size: 11px; font-weight:800; cursor:pointer;
+}
+.withdraw-amount {
+  font-size: 28px; font-weight: 900;
+  background: var(--g-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.withdraw-sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+.withdraw-sub b { color: var(--gold); }
+
+/* 功能宫格 */
+.quick-grid {
+  margin: 0 20px 20px;
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+}
+.quick-item {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 6px; text-align: center;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.quick-item:active { border-color: var(--rose); }
+.quick-icon {
+  width: 36px; height: 36px; border-radius: 10px; margin: 0 auto 6px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.quick-icon.c1 { background: rgba(244,114,182,0.15); }
+.quick-icon.c2 { background: rgba(245,158,11,0.15); }
+.quick-icon.c3 { background: rgba(167,139,250,0.15); }
+.quick-icon.c4 { background: rgba(52,211,153,0.15); }
+.quick-icon.c5 { background: rgba(96,165,250,0.15); }
+.quick-icon.c6 { background: rgba(239,68,68,0.15); }
+.quick-label { font-size: 10px; font-weight: 600; color: var(--text-secondary); }
+
+/* 定价设置 */
+.pricing-card {
+  margin: 0 20px 20px;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 16px; padding: 16px;
+}
+.pricing-tier {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.pricing-tier:last-child { border-bottom: none; }
+.pricing-level {
+  width: 32px; height: 32px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900;
+  background: var(--g-primary); color: #fff; flex-shrink: 0;
+}
+.pricing-info { flex: 1; }
+.pricing-name { font-size: 12px; font-weight: 700; }
+.pricing-range { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+.pricing-input {
+  background: var(--bg); border: 1px solid var(--border-strong);
+  border-radius: 8px; padding: 6px 10px;
+  font-size: 13px; font-weight: 800; color: var(--gold);
+  width: 80px; text-align: center; outline: none;
+}
+.pricing-hint {
+  background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.2);
+  border-radius: 10px; padding: 8px 10px;
+  font-size: 10px; color: var(--blue); margin-top: 12px;
+  line-height: 1.5;
+}
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="status-bar">
+    <div class="notch"></div>
+    <span>9:41</span>
+    <div class="right"><span>📶</span><span>🔋</span></div>
+  </div>
+
+  <div class="scroll" style="padding-bottom: 80px;">
+    <!-- 顶栏 -->
+    <div class="top-bar">
+      <div class="top-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M2 19h20l-2-10-5 4-3-6-3 6-5-4-2 10z"/></svg> 创作者中心</div>
+      <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></button>
+    </div>
+
+    <!-- KYC 状态 -->
+    <div class="kyc-card">
+      <div class="kyc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="kyc-info">
+        <div class="kyc-title">年龄声明已通过</div>
+        <div class="kyc-sub">已验证 18+ · 可发布内容</div>
+      </div>
+      <span class="kyc-badge">已认证</span>
+    </div>
+
+    <!-- 数据概览 -->
+    <div class="stats">
+      <div class="section-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> 本月概览</div>
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">播放量</div>
+          <div class="stat-value">124.8k</div>
+          <div class="stat-change">↑ 23%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">粉丝</div>
+          <div class="stat-value">12.4k</div>
+          <div class="stat-change">↑ 8%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">收入</div>
+          <div class="stat-value">$2.1k</div>
+          <div class="stat-change">↑ 31%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 可提现 -->
+    <div class="withdraw-card">
+      <div class="withdraw-header">
+        <div class="section-label" style="margin:0;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> 可提现余额</div>
+        <button class="withdraw-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> 提现</button>
+      </div>
+      <div class="withdraw-amount">$3,210.50</div>
+      <div class="withdraw-sub">链上转账 (USDT/USDC) · 最低 <b>$100</b> · 1-2 工作日到账</div>
+    </div>
+
+    <!-- 快捷功能 -->
+    <div style="padding: 0 20px;">
+      <div class="section-label">⚡ 快捷操作</div>
+    </div>
+    <div class="quick-grid">
+      <div class="quick-item">
+        <div class="quick-icon c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
+        <div class="quick-label">上传视频</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+        <div class="quick-label">剧集管理</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div class="quick-label">定价设置</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c4"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="quick-label">数据看板</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c5"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <div class="quick-label">评论管理</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c6"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="quick-label">审核状态</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+        <div class="quick-label">分润明细</div>
+      </div>
+      <div class="quick-item">
+        <div class="quick-icon c2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="quick-label">主页设置</div>
+      </div>
+    </div>
+
+    <!-- 定价设置 -->
+    <div class="pricing-card">
+      <div class="section-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><polygon points="12 2 22 12 12 22 2 12 12 2"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg> 我的定价区间</div>
+      
+      <div class="pricing-tier">
+        <div class="pricing-level">L1</div>
+        <div class="pricing-info">
+          <div class="pricing-name">新人创作者</div>
+          <div class="pricing-range">平台建议价区间</div>
+        </div>
+        <input class="pricing-input" value="$1.99">
+      </div>
+
+      <div class="pricing-tier">
+        <div class="pricing-level" style="background: var(--g-purple);">L2</div>
+        <div class="pricing-info">
+          <div class="pricing-name">成长创作者</div>
+          <div class="pricing-range">你的当前等级</div>
+        </div>
+        <input class="pricing-input" style="border-color: var(--rose);" value="$9.99">
+      </div>
+
+      <div class="pricing-tier">
+        <div class="pricing-level" style="background: var(--g-gold); color: #1a1828;">L3</div>
+        <div class="pricing-info">
+          <div class="pricing-name">头部创作者</div>
+          <div class="pricing-range">顶级创作者专享</div>
+        </div>
+        <input class="pricing-input" value="$19.99" disabled style="opacity:0.4;">
+      </div>
+
+      <div class="pricing-hint">
+        💡 平台分润比例、定价区间等均由后台配置，详情见创作者协议。全集打包价 = 单集价 × 集数 × 0.6 (6折)。
+      </div>
+    </div>
+
+    <div style="height: 20px;"></div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7h-6v7H4a1 1 0 0 1-1-1V9.5z"/></svg><div>首页</div></div>
+    <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg><div>上传</div></div>
+    <div class="tab-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg><div>工作台</div></div>
+    <div class="tab-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div>我的</div></div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+</body>
+</html>

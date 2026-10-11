@@ -1,0 +1,7 @@
+org.springframework.boot.SpringApplicationRunListener=\
+org.jeecg.config.DruidWallConfigRegister,\
+org.jeecg.config.JdbcLoggingRunListener
+org.springframework.context.ApplicationListener=\
+org.jeecg.common.util.log.SensitiveDataLogbackInstaller
+org.springframework.boot.env.EnvironmentPostProcessor=\
+org.jeecg.common.env.H5JdbcSqlOnlyLevelGuard

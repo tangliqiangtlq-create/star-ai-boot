@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>榴莲 TV · 首页</title>
+<style>
+
+/* ====== 设计系统 ====== */
+:root {
+  --bg: #0B0A14;
+  --bg-card: #1A1828;
+  --bg-card-hover: #221F35;
+  --border: rgba(255,255,255,0.06);
+  --border-strong: rgba(255,255,255,0.12);
+  --text: #FFFFFF;
+  --text-secondary: #A09DB0;
+  --text-muted: #6B6880;
+  --gold: #F59E0B;
+  --gold-light: #FBBF24;
+  --rose: #F472B6;
+  --rose-deep: #FB7185;
+  --purple: #A78BFA;
+  --green: #34D399;
+  --blue: #60A5FA;
+  --danger: #EF4444;
+  
+  --gradient-primary: linear-gradient(135deg, #F472B6 0%, #FB7185 50%, #F59E0B 100%);
+  --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%);
+  --gradient-purple: linear-gradient(135deg, #A78BFA 0%, #F472B6 100%);
+  --gradient-dark: linear-gradient(180deg, rgba(11,10,20,0) 0%, rgba(11,10,20,0.95) 80%, #0B0A14 100%);
+  --gradient-overlay: linear-gradient(135deg, rgba(244,114,182,0.15) 0%, rgba(167,139,250,0.1) 100%);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ====== 手机框（用于画廊等） ====== */
+.phone-frame {
+  width: 390px;
+  height: 844px;
+  background: var(--bg);
+  border-radius: 44px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(255,255,255,0.08), 0 0 0 4px #000;
+}
+
+/* ====== 状态栏 ====== */
+.status-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  position: relative;
+  z-index: 50;
+}
+.status-bar .notch {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 28px;
+  background: #000;
+  border-radius: 18px;
+}
+.status-bar .right { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+
+/* ====== 底部 Home Indicator ====== */
+.home-indicator {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 3px;
+  z-index: 60;
+}
+
+/* ====== Tab Bar ====== */
+.tab-bar {
+  position: absolute;
+  bottom: 34px;
+  left: 0; right: 0;
+  height: 56px;
+  background: rgba(26,24,40,0.85);
+  -webkit-backdrop-filter:none;
+  -webkit--webkit-backdrop-filter:none;
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding-bottom: 4px;
+  z-index: 55;
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 9px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.tab-item.active { color: var(--rose); }
+.tab-item .icon { font-size: 22px; line-height: 1; }
+.tab-item .label { font-weight: 600; }
+
+/* ====== Hero Banner ====== */
+.hero {
+  position: relative;
+  height: 360px;
+  margin: 0 0 16px;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #4C1D95 0%, #831843 50%, #7C2D12 100%);
+}
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='25' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 60px;
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -20%;
+  width: 140%; height: 200%;
+  background: radial-gradient(ellipse at center, rgba(244,114,182,0.25) 0%, transparent 60%);
+  animation: heroGlow 6s ease-in-out infinite alternate;
+}
+@keyframes heroGlow {
+  0% { transform: translate(0,0) rotate(0deg); }
+  100% { transform: translate(2%,-2%) rotate(2deg); }
+}
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11,10,20,0) 0%, rgba(11,10,20,0.7) 60%, var(--bg) 100%);
+}
+.hero-content {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  z-index: 2;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(244,114,182,0.2);
+  border: 1px solid rgba(244,114,182,0.4);
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--rose);
+  -webkit-backdrop-filter:none;
+}
+.hero-title {
+  font-size: 28px;
+  font-weight: 900;
+  margin: 10px 0 6px;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+}
+.hero-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.hero-btns { display: flex; gap: 10px; }
+.btn-play {
+  flex: 1;
+  background: var(--gradient-primary);
+  border: none;
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(244,114,182,0.35);
+}
+.btn-list {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid var(--border-strong);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* ====== 卡片网格 ====== */
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 10px;
+}
+.section-title h2 {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.3px;
+  margin: 0;
+}
+.section-title h2::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  background: var(--gradient-primary);
+  border-radius: 2px;
+  margin-right: 8px;
+  vertical-align: -2px;
+}
+.section-title .more {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 20px;
+}
+.video-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+}
+.video-card:active { transform: scale(0.97); }
+.card-thumb {
+  aspect-ratio: 3/4;
+  position: relative;
+  overflow: hidden;
+}
+.card-thumb-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.card-thumb-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(11,10,20,0) 40%, rgba(11,10,20,0.85) 100%);
+}
+.card-play {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.15);
+  -webkit-backdrop-filter:none;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.video-card:active .card-play { opacity: 1; }
+.card-duration {
+  position: absolute;
+  bottom: 8px; right: 8px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  -webkit-backdrop-filter:none;
+}
+.card-badge {
+  position: absolute;
+  top: 8px; left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+.badge-price { background: var(--gradient-gold); color: #1a1828; }
+.badge-vip { background: linear-gradient(135deg, #A78BFA, #F472B6); color: #fff; }
+.badge-free { background: var(--gradient-primary); color: #fff; }
+.badge-new { background: #34D399; color: #064E3B; }
+.card-info { padding: 10px 12px 12px; }
+.card-title {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0 0 4px;
+  color: #fff;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.card-creator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.card-avatar {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--gradient-purple);
+}
+
+
+/* 搜索栏 */
+.top-search {
+  padding: 0 20px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo {
+  font-size: 20px;
+  font-weight: 900;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px;
+}
+.search-input {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #fff;
+  outline: none;
+}
+.search-input::placeholder { color: var(--text-muted); }
+.icon-btn {
+  width: 38px; height: 38px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Tab 切换 */
+.tab-scroll {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tab-scroll::-webkit-scrollbar { display: none; }
+.tab-chip {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 600;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.tab-chip.active {
+  background: var(--gradient-primary);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(244,114,182,0.3);
+}
+
+/* VIP Banner */
+.vip-banner {
+  margin: 0 20px 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #4C1D95 0%, #831843 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(244,114,182,0.2);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.vip-banner::after {
+  content: '';
+  position: absolute;
+  right: -30px; top: -30px;
+  width: 120px; height: 120px;
+  background: radial-gradient(circle, rgba(251,191,36,0.3) 0%, transparent 70%);
+}
+.vip-left { flex: 1; position: relative; z-index: 1; }
+.vip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--gradient-gold);
+  color: #1a1828;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 3px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.5px;
+}
+.vip-title {
+  font-size: 15px;
+  font-weight: 900;
+  margin: 8px 0 2px;
+}
+.vip-desc {
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+}
+.vip-btn {
+  background: #fff;
+  color: #4C1D95;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 滚动内容区 */
+.scroll-area {
+  height: calc(100% - 44px - 56px - 8px);
+  overflow-y: auto;
+  padding-bottom: 20px;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="status-bar">
+    <div class="notch"></div>
+    <span>9:41</span>
+    <div class="right">
+      <span>📶</span>
+      <span>🔋</span>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+    <!-- 顶栏 -->
+    <div class="top-search">
+      <span class="logo">🍈 榴莲 TV</span>
+      <div class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    </div>
+
+    <!-- Tab -->
+    <div class="tab-scroll">
+      <div class="tab-chip active">🔥 推荐</div>
+      <div class="tab-chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg> 都市</div>
+      <div class="tab-chip">💕 浪漫</div>
+      <div class="tab-chip">🌙 午夜</div>
+      <div class="tab-chip">🏆 热播</div>
+      <div class="tab-chip">🆕 新片</div>
+    </div>
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-overlay"></div>
+      <div class="hero-content">
+        <div class="hero-tag">✨ 本周热映 · 第 3 集免费</div>
+        <h1 class="hero-title">暗夜迷情<br>午夜邂逅</h1>
+        <p class="hero-desc">都市悬疑 · 深夜邂逅 · 12集精品短剧</p>
+        <div class="hero-btns">
+          <button class="btn-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg> 立即播放</button>
+          <button class="btn-list">＋ 收藏</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIP Banner -->
+    <div class="vip-banner">
+      <div class="vip-left">
+        <span class="vip-badge"><svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2 19h20l-2-10-5 4-3-6-3 6-5-4-2 10z"/></svg> VIP</span>
+        <div class="vip-title">开通会员 · 全站免看</div>
+        <div class="vip-desc">年卡最低 $4.17 / 月 · 支持 USDT</div>
+      </div>
+      <button class="vip-btn">立即开通 →</button>
+    </div>
+
+    <!-- 推荐 -->
+    <div class="section-title">
+      <h2>🔥 为你推荐</h2>
+      <span class="more">查看全部 →</span>
+    </div>
+    <div class="card-grid">
+      <div class="video-card">
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:linear-gradient(135deg,#831843,#4C1D95);"></div>
+          <div class="card-thumb-overlay"></div>
+          <span class="card-badge badge-price">$15</span>
+          <span class="card-duration">08:42</span>
+          <div class="card-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">暗夜迷情：午夜邂逅 第3集</h3>
+          <div class="card-meta">
+            <div class="card-creator"><div class="card-avatar"></div>@神秘旅人</div>
+            <span>12.4k</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:linear-gradient(135deg,#7C2D12,#831843);"></div>
+          <div class="card-thumb-overlay"></div>
+          <span class="card-badge badge-free">🆓 前3集</span>
+          <span class="card-duration">06:18</span>
+          <div class="card-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">情迷外滩 · 都市艳遇 第1集</h3>
+          <div class="card-meta">
+            <div class="card-creator"><div class="card-avatar"></div>@都市夜归人</div>
+            <span>8.7k</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:linear-gradient(135deg,#164E63,#4C1D95);"></div>
+          <div class="card-thumb-overlay"></div>
+          <span class="card-badge badge-vip"><svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2 19h20l-2-10-5 4-3-6-3 6-5-4-2 10z"/></svg> VIP</span>
+          <span class="card-duration">10:05</span>
+          <div class="card-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">血月传说：古墓魅影 第5集</h3>
+          <div class="card-meta">
+            <div class="card-creator"><div class="card-avatar"></div>@古墓派</div>
+            <span>24.1k</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:linear-gradient(135deg,#831843,#164E63);"></div>
+          <div class="card-thumb-overlay"></div>
+          <span class="card-badge badge-new">✨ 新</span>
+          <span class="card-duration">07:33</span>
+          <div class="card-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">温泉物语：北海道的秘密</h3>
+          <div class="card-meta">
+            <div class="card-creator"><div class="card-avatar"></div>@北海道</div>
+            <span>3.2k</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 热播 -->
+    <div class="section-title">
+      <h2>🏆 本周热播</h2>
+      <span class="more">查看全部 →</span>
+    </div>
+    <div class="card-grid">
+      <div class="video-card">
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:linear-gradient(135deg,#F59E0B,#FB7185);"></div>
+          <div class="card-thumb-overlay"></div>
+          <span class="card-badge badge-price">$24.99</span>
+          <span class="card-duration">12集</span>
+          <div class="card-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">都市欲望（全集打包）</h3>
+          <div class="card-meta">
+            <div class="card-creator"><div class="card-avatar"></div>@霓虹灯下</div>
+            <span>56.2k</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="video-card">
+        <div class="card-thumb">
+          <div class="card-thumb-bg" style="background:linear-gradient(135deg,#6D28D9,#DB2777);"></div>
+          <div class="card-thumb-overlay"></div>
+          <span class="card-badge badge-price">$9.99</span>
+          <span class="card-duration">09:20</span>
+          <div class="card-play"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
+        </div>
+        <div class="card-info">
+          <h3 class="card-title">东京不夜城：银座之夜</h3>
+          <div class="card-meta">
+            <div class="card-creator"><div class="card-avatar"></div>@银座先生</div>
+            <span>31.8k</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 20px;"></div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <div class="label">首页</div>
+    </div>
+    <div class="tab-item">
+      <div class="icon">🔍</div>
+      <div class="label">发现</div>
+    </div>
+    <div class="tab-item">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+      <div class="label">VIP</div>
+    </div>
+    <div class="tab-item">
+      <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="label">我的</div>
+    </div>
+  </div>
+
+  <div class="home-indicator"></div>
+</div>
+
+</body>
+</html>

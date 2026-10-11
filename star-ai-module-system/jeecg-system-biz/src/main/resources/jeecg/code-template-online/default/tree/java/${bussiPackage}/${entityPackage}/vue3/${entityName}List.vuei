@@ -1,0 +1,447 @@
+<#include "/common/utils.ftl">
+<#assign pidFieldName = "">
+<#assign hasChildrenField = "">
+<#assign bpm_flag=false>
+<#list originalColumns as po>
+  <#if po.fieldDbName == tableVo.extendParams.pidField>
+    <#assign pidFieldName = po.fieldName>
+  </#if>
+  <#if po.fieldDbName == tableVo.extendParams.hasChildren>
+    <#assign hasChildrenField = po.fieldName>
+  </#if>
+</#list>
+<#assign list_need_pca=false>
+<#-- Loop start -->
+<#list columns as po>
+  <#if po.fieldDbName=='bpm_status'>
+    <#assign bpm_flag=true>
+  </#if>
+<#if po.classType=='pca'>
+<#assign list_need_pca=true>
+</#if>
+</#list>
+<template>
+  <div>
+    <!--Reference table-->
+    <BasicTable @register="registerTable" :rowSelection="rowSelection" :expandedRowKeys="expandedRowKeys" @expand="handleExpand" @fetch-success="onFetchSuccess">
+      <!--Slot: table title-->
+      <template #tableTitle>
+          <a-button type="primary" @click="handleCreate" preIcon="ant-design:plus-outlined"> Add</a-button>
+          <a-button  type="primary" preIcon="ant-design:export-outlined" @click="onExportXls"> Export</a-button>
+          <j-upload-button  type="primary" preIcon="ant-design:import-outlined" @click="onImportXls">Import</j-upload-button>
+
+          <a-dropdown v-if="selectedRowKeys.length > 0">
+          <template #overlay>
+            <a-menu>
+              <a-menu-item key="1" @click="batchHandleDelete">
+                <Icon icon="ant-design:delete-outlined"></Icon>
+                Delete
+              </a-menu-item>
+            </a-menu>
+          </template>
+          <a-button>Batch actions
+            <Icon icon="ant-design:down-outlined"></Icon>
+          </a-button>
+        </a-dropdown>
+        <#-- update-begin---author:chenrui ---date:20231228  for：[QQYUN-7527]Vue3 codegen includes advanced query by default---------- -->
+        <!-- Advanced query -->
+        <super-query :config="superQueryConfig" @search="handleSuperQuery" />
+        <#-- update- end---author:chenrui ---date:20231228  for：[QQYUN-7527]Vue3 codegen includes advanced query by default---------- -->
+      </template>
+      <!--Action column-->
+      <template #action="{ record }">
+        <TableAction :actions="getTableAction(record)" :dropDownActions="getDropDownAction(record)"/>
+      </template>
+      <!--Field display slot-->
+      <template v-slot:bodyCell="{ column, record, index, text }">
+      <#list columns as po>
+        <#if po.classType=='umeditor' || po.classType=='pca' || po.classType=='file'>
+        <template v-if="column.dataIndex==='${po.fieldName}'">
+        <#if po.classType=='umeditor'>
+          <!--Rich text field display slot-->
+          <div v-html="text"></div>
+        </#if>
+        <#if po.classType=='pca'>
+          <!--Region field display slot-->
+          {{ getAreaTextByCode(text) }}
+        </#if>
+        <#if po.classType=='file'>
+          <!--File field display slot-->
+          <span v-if="!text" style="font-size: 12px;font-style: italic;">No file</span>
+          <a-button v-else :ghost="true" type="primary" preIcon="ant-design:download-outlined" size="small" @click="downloadFile(text)">Download</a-button>
+        </#if>
+        </template>
+        </#if>
+      </#list>
+      </template>
+    </BasicTable>
+    <!--Dict popup-->
+    <${entityName}Modal @register="registerModal" @success="handleSuccess"/>
+  </div>
+</template>
+
+<script lang="ts" name="${entityPackage}-${entityName?uncap_first}" setup>
+  //TypeScript syntax
+  import {ref, reactive, computed, unref, toRaw, nextTick} from 'vue';
+  import {BasicTable, TableAction} from '/@/components/Table';
+  import {useModal} from '/@/components/Modal';
+  import { useListPage } from '/@/hooks/system/useListPage'
+  import ${entityName}Modal from './components/${entityName}Modal.vue';
+  import {columns, searchFormSchema, superQuerySchema} from './${entityName}.data';
+  import { downloadFile } from '/@/utils/common/renderUtils';
+  import {list, delete${entityName}, batchDelete${entityName}, getExportUrl,getImportUrl, getChildList,getChildListBatch} from './${entityName}.api';
+  <#if list_need_pca>
+  import { getAreaTextByCode } from '/@/components/Form/src/utils/Area';
+  </#if>
+  <#if bpm_flag==true>
+  import { startProcess } from '/@/api/common/api';
+  </#if>
+  const queryParam = reactive<any>({});
+  const expandedRowKeys = ref([]);
+  //Dict model
+  const [registerModal, {openModal}] = useModal();
+   //Register table data
+  const { prefixCls,tableContext,onExportXls,onImportXls } = useListPage({
+    tableProps:{
+         api: list,
+         title: '${tableVo.ftlDescription}',
+         columns,
+         canResize:false,
+         <#-- update-begin---author:chenrui ---date:20231228  for：[issue/#5658] Tree table checkbox overlaps expand button---------- -->
+         isTreeTable: true,
+         <#-- update- end---author:chenrui ---date:20231228  for：[issue/#5658] Tree table checkbox overlaps expand button---------- -->
+         formConfig: {
+           //labelWidth: 120,
+           schemas: searchFormSchema,
+           autoSubmitOnEnter:true,
+           showAdvancedButton:true,
+           fieldMapToNumber: [
+           <#list columns as po>
+           <#if po.isQuery=='Y'>
+           <#if po.queryMode!='single'>
+              <#-- update-begin---author:chenrui ---date:20240527  for：[TV360X-388]Date range query control---------- -->
+              <#if po.fieldDbType=='int' || po.fieldDbType=='double' || po.fieldDbType=='BigDecimal' || po.classType=='time'>
+              <#-- update- end---author:chenrui ---date:20240527  for：[TV360X-388]Date range query control---------- -->
+              ['${po.fieldName}', ['${po.fieldName}_begin', '${po.fieldName}_end']],
+           </#if>
+           </#if>
+           </#if>
+           </#list>
+           ],
+           fieldMapToTime: [
+           <#list columns as po>
+           <#if po.isQuery=='Y'>
+           <#if po.queryMode!='single'>
+           <#if po.classType=='date'>
+              ['${po.fieldName}', ['${po.fieldName}_begin', '${po.fieldName}_end'], 'YYYY-MM-DD'],
+           <#elseif po.classType=='datetime'>
+              ['${po.fieldName}', ['${po.fieldName}_begin', '${po.fieldName}_end'], 'YYYY-MM-DD HH:mm:ss'],
+           </#if>
+           </#if>
+           </#if>
+           </#list>
+           ],
+         },
+         actionColumn: {
+           width: 240,
+           fixed:'right'
+         },
+         beforeFetch: (params) => {
+           return Object.assign(params, queryParam);
+         },
+    },
+     exportConfig: {
+          name:"${tableVo.ftlDescription}",
+          url: getExportUrl,
+          params: queryParam,
+        },
+        importConfig: {
+          url: getImportUrl,
+          success: importSuccess
+        },
+    })
+
+  const [registerTable, {reload, collapseAll, updateTableDataRecord, findTableDataRecord,getDataSource},{ rowSelection, selectedRowKeys }] = tableContext
+
+<#-- update-begin---author:chenrui ---date:20231228  for：[QQYUN-7527]Vue3 codegen includes advanced query by default---------- -->
+  // Advanced query config
+  const superQueryConfig = reactive(superQuerySchema);
+
+  /**
+   * Advanced query handler
+   */
+  function handleSuperQuery(params) {
+    Object.keys(params).map((k) => {
+      queryParam[k] = params[k];
+    });
+    reload();
+  }
+<#-- update- end---author:chenrui ---date:20231228  for：[QQYUN-7527]Vue3 codegen includes advanced query by default---------- -->
+
+  /**
+   * Add handler
+   */
+  function handleCreate() {
+    openModal(true, {
+      isUpdate: false,
+    });
+  }
+
+  /**
+   * Edit handler
+   */
+  async function handleEdit(record) {
+    openModal(true, {
+      record,
+      isUpdate: true,
+    });
+  }
+
+  /**
+   * Detail
+   */
+  async function handleDetail(record) {
+    openModal(true, {
+      record,
+      isUpdate: true,
+      hideFooter: true,
+    });
+  }
+
+  /**
+   * Delete handler
+   */
+  async function handleDelete(record) {
+    await delete${entityName}({id: record.id}, importSuccess);
+  }
+
+  /**
+   * Batch delete handler
+   */
+  async function batchHandleDelete() {
+    const ids = selectedRowKeys.value.filter(item => !item.includes('loadChild'))
+    await batchDelete${entityName}({id: ids}, importSuccess);
+  }
+  /**
+   * Import
+   */
+   function importSuccess() {
+    (selectedRowKeys.value = []) && reload();
+  }
+  /**
+   * Add child
+   */
+  function handleAddSub(record) {
+    openModal(true, {
+      record,
+      isUpdate: false,
+    });
+  }
+  /**
+   * Success callback
+   */
+  async function handleSuccess({isUpdate, values, expandedArr, changeParent}) {
+    if (isUpdate) {
+      if (changeParent) {
+        reload();
+      } else {
+        let data = await list({ id: values.id, pageSize: 1, pageNo: 1, ${pidFieldName}: values['${pidFieldName}'] });
+        if (data && data.records && data.records.length > 0) {
+          // Edit callback
+          updateTableDataRecord(values.id, data.records[0]);
+        }else{
+          updateTableDataRecord(values.id, values);
+        }
+      }
+    } else {
+        if(!values['id'] || !values['${pidFieldName}']){
+            //Add root node
+            reload();
+        }else{
+            //Add child node
+            expandedRowKeys.value = [];
+            for (let key of unref(expandedArr)) {
+                await expandTreeNode(key)
+            }
+        }
+    }
+  }
+
+  /**
+   * API success callback
+   */
+  function onFetchSuccess(result) {
+      getDataByResult(result.items)&&loadDataByExpandedRows();
+  }
+  /**
+   * Query data for expanded rows (async reload children after save)
+   */
+  async function loadDataByExpandedRows() {
+      if (unref(expandedRowKeys).length > 0) {
+          const res = await getChildListBatch({ parentIds: unref(expandedRowKeys).join(',')});
+          if (res.success && res.result.records.length>0) {
+              //Batch load child nodes for expanded rows
+              let records = res.result.records
+              const listMap = new Map();
+              for (let item of records) {
+                  let pid = item['${pidFieldName}'];
+                  if (unref(expandedRowKeys).includes(pid)) {
+                      let mapList = listMap.get(pid);
+                      if (mapList == null) {
+                          mapList = [];
+                      }
+                      mapList.push(item);
+                      listMap.set(pid, mapList);
+                  }
+              }
+              let childrenMap = listMap;
+              let fn = (list) => {
+                  if(list) {
+                      list.forEach(data => {
+                          if (unref(expandedRowKeys).includes(data.id)) {
+                              data.children = getDataByResult(childrenMap.get(data.id))
+                              fn(data.children)
+                          }
+                      })
+                  }
+              };
+              fn(getDataSource())
+          }
+      }
+  }
+  /**
+   * Process dataset
+   */
+  function getDataByResult(result){
+      if(result && result.length>0){
+          return result.map(item=>{
+              //Check whether node is marked as having children
+              if(item["hasChild"]=='1'){
+                  let loadChild = { id: item.id+'_loadChild', name: 'loading...', isLoading: true }
+                  item.children = [loadChild]
+              }
+              return item
+          })
+      }
+  }
+  /**
+   *Tree node expand/merge
+   * */
+  async function handleExpand(expanded, record) {
+    // If expanded with unloaded children, fetch child node data
+    if (expanded) {
+       expandedRowKeys.value.push(record.id)
+      if (record.children.length > 0 && !!record.children[0].isLoading) {
+        let result = await getChildList({${pidFieldName}: record.id});
+        result=result.records?result.records:result;
+        if (result && result.length > 0) {
+          record.children = getDataByResult(result);
+        } else {
+          record.children = null
+          record.hasChild = '0'
+        }
+      }
+    } else {
+      let keyIndex = expandedRowKeys.value.indexOf(record.id)
+      if (keyIndex >= 0) {
+        expandedRowKeys.value.splice(keyIndex, 1);
+      }
+    }
+  }
+  /**
+   *Handle tree expand/merge after table operations
+   * */
+  async function expandTreeNode(key) {
+    let record = findTableDataRecord(key)
+    expandedRowKeys.value.push(key);
+      let result = await getChildList({${pidFieldName}: key});
+      if (result && result.length > 0) {
+          record.children = getDataByResult(result);
+      } else {
+          record.children = null
+          record.hasChild = '0'
+      }
+      updateTableDataRecord(key, record);
+  }
+  /**
+   * Action column
+   */
+  function getTableAction(record) {
+    return [
+      {
+        label: 'Edit',
+        onClick: handleEdit.bind(null, record),
+      },
+      {
+        label: 'Add child',
+        onClick: handleAddSub.bind(null, {${pidFieldName}: record.id}),
+      }
+    ]
+  }
+   /**
+    * Dropdown actions
+    */
+   function getDropDownAction(record){
+     <#if bpm_flag==true>
+     let dropDownAction = [
+       {
+         label: 'Detail',
+         onClick: handleDetail.bind(null, record),
+       }, {
+         label: 'Delete',
+         popConfirm: {
+           title: 'Confirm delete?',
+           confirm: handleDelete.bind(null, record),
+           placement: 'topLeft',
+         }
+       }
+     ];
+     if(record.bpmStatus == '1' || !record.bpmStatus){
+       dropDownAction.push({
+         label: 'Start workflow',
+         popConfirm: {
+           title: 'Confirm submit workflow?',
+           confirm: handleProcess.bind(null, record),
+           placement: 'topLeft',
+         }
+       })
+     }
+     return dropDownAction;
+     <#else>
+     return [
+       {
+         label: 'Detail',
+         onClick: handleDetail.bind(null, record),
+       }, {
+         label: 'Delete',
+         popConfirm: {
+           title: 'Confirm delete?',
+           confirm: handleDelete.bind(null, record),
+           placement: 'topLeft',
+         }
+       }
+     ]
+     </#if>
+   }
+
+  <#if bpm_flag==true>
+  /**
+   * Submit workflow
+   */
+  async function handleProcess(record) {
+    let params = {
+      flowCode: 'dev_${tableName}_001',
+      id: record.id,
+      formUrl: '${entityPackage}/components/${entityName}Form',
+      formUrlMobile: ''
+    }
+    await startProcess(params);
+    await reload();
+  }
+  </#if>
+
+</script>
+
+<style scoped>
+<#include "/common/form/vue3SearchStyle.ftl">
+</style>

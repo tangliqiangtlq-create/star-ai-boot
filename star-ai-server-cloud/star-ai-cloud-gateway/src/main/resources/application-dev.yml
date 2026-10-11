@@ -1,0 +1,23 @@
+# Only spring.profiles.active=dev takes effect.
+# The root directory .env is optionally imported by application.yml first; the registered IP is bound here (test/prod will not be applied).
+# IDE Working directory please set it as the warehouse root.
+spring:
+  cloud:
+    inetutils:
+      preferred-networks: ${INETUTILS_PREFERRED_NETWORKS:}
+      ignored-interfaces: ${INETUTILS_IGNORED_INTERFACES:}
+    nacos:
+      discovery:
+        ip: ${SPRING_CLOUD_NACOS_DISCOVERY_IP:}
+    gateway:
+      discovery:
+        locator:
+          enabled: ${GATEWAY_DISCOVERY_LOCATOR_ENABLED:true}
+          lower-case-service-id: true
+      # A6: CORS is Bean-only (GatewayCorsConfiguration). Do NOT add globalcors here.
+      sig:
+        required-in-prod: false
+
+# SHARD-ADAPT dev sharding: pin the gateway module master URL to the mpay_system schema (shared with system)
+# USERNAME/PASSWORD are still resolved from ${MYSQL_USER}/${MYSQL_PASSWORD} in .env
+SPRING_DATASOURCE_DYNAMIC_DATASOURCE_MASTER_URL: jdbc:mysql://127.0.0.1:3306/mpay_system?characterEncoding=UTF-8&useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai

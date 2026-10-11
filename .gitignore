@@ -1,0 +1,25 @@
+# Maven
+target/
+*.iml
+.idea/
+.vscode/settings.json
+.vscode/workspace.xml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Node (if any frontend subdirs)
+node_modules/
+dist/
+.next/
+
+# Temp
+tmp/
+*.tmp
+.vscode/*
+!.vscode/extensions.json

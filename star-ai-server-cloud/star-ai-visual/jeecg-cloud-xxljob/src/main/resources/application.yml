@@ -1,0 +1,32 @@
+server:
+  port: 9000
+  servlet:
+    context-path: /xxl-job-admin
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+        secure: ${SESSION_COOKIE_SECURE:false}
+  #Data source configuration
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:@profile.name@}
+
+# =============================================================================
+# M-1: Actuator hardening — xxljob only needs health for K8S probes
+# =============================================================================
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        # Expose health only; prometheus/metrics/info are withheld to prevent metric leakage
+        include: health
+  endpoint:
+    # enabled-by-default=false also disables health, so it must be enabled explicitly
+    health:
+      enabled: true
+      show-details: never
+      show-components: never
+    shutdown:
+      enabled: false

@@ -1,0 +1,74 @@
+package ${bussiPackage}.${entityPackage}.service;
+
+import org.jeecg.common.system.vo.SelectTreeModel;
+import ${bussiPackage}.${entityPackage}.entity.${entityName};
+import com.baomidou.mybatisplus.extension.service.IService;
+import org.jeecg.common.exception.JeecgBootException;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import java.util.List;
+
+/**
+ * @Description: ${tableVo.ftlDescription}
+ * @Author: jeecg-boot
+ * @Date:   ${.now?string["yyyy-MM-dd"]}
+ * @Version: V1.0
+ */
+public interface I${entityName}Service extends IService<${entityName}> {
+
+	/**Root parent ID value*/
+	public static final String ROOT_PID_VALUE = "0";
+	
+	/**Tree node has-children status value*/
+	public static final String HASCHILD = "1";
+	
+	/**Tree node no-children status value*/
+	public static final String NOCHILD = "0";
+
+	/**
+	 * Add node
+	 *
+	 * @param ${entityName?uncap_first}
+	 */
+	void add${entityName}(${entityName} ${entityName?uncap_first});
+	
+	/**
+   * Update node
+   *
+   * @param ${entityName?uncap_first}
+   * @throws JeecgBootException
+   */
+	void update${entityName}(${entityName} ${entityName?uncap_first}) throws JeecgBootException;
+	
+	/**
+	 * Delete node
+	 *
+	 * @param id
+   * @throws JeecgBootException
+	 */
+	void delete${entityName}(String id) throws JeecgBootException;
+
+	  /**
+	   * Query all data without pagination
+	   *
+	   * @param queryWrapper
+	   * @return List<${entityName}>
+	   */
+    List<${entityName}> queryTreeListNoPage(QueryWrapper<${entityName}> queryWrapper);
+
+	/**
+	 * [Vue3] Load category dict data by parent code
+	 *
+	 * @param parentCode
+	 * @return
+	 */
+	List<SelectTreeModel> queryListByCode(String parentCode);
+
+	/**
+	 * [Vue3] Query child nodes by pid
+	 *
+	 * @param pid
+	 * @return
+	 */
+	List<SelectTreeModel> queryListByPid(String pid);
+
+}
