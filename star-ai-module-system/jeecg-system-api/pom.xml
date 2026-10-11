@@ -13,8 +13,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>star-ai-system-local-api</module>
-        <module>star-ai-system-cloud-api</module>
+        <module>jeecg-system-local-api</module>
+        <module>jeecg-system-cloud-api</module>
     </modules>
 
     <dependencies>

@@ -1003,9 +1003,6 @@ public interface ISysBaseAPI extends CommonAPI {
   @PostMapping("/sys/verifyUsernameAndPassword")
   Result<Boolean> verifyUsernameAndPassword(@RequestBody JSONObject sysLoginModel);
 
-  @PostMapping("/sys/sysUserFeeConfig/list")
-      @RequestParam(required = false) String userId);
-
   @PostMapping("/sys/user/listAll")
   Result<Page<cn.hutool.json.JSONObject>> queryAllUserPageList(
       @RequestParam Map<String, String> parameter);

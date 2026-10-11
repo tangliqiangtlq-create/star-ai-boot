@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>star-ai-server-cloud</artifactId>
+        <groupId>org.jeecgframework.boot</groupId>
+        <version>3.7.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>star-ai-module-creator</artifactId>
+    <packaging>pom</packaging>
+    <name>star-ai-module-creator</name>
+    <description>创作者中心 - 入驻/MinIO/转码/定价</description>
+    <modules>
+        <module>star-ai-module-creator-api</module>
+        <module>star-ai-module-creator-biz</module>
+    </modules>
+</project>

@@ -1,0 +1,50 @@
+package org.jeecg.payment.controller;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import io.swagger.annotations.ApiOperation;
+import jakarta.servlet.http.HttpServletRequest;
+import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.payment.entity.AiPaymentSettlement;
+import org.jeecg.payment.service.IAiPaymentSettlementService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+public class AiPaymentSettlementController {
+    @Autowired
+    private IAiPaymentSettlementService aiPaymentSettlementService;
+
+    @ApiOperation("分页查询")
+    @GetMapping("/list")
+    public Result<IPage<AiPaymentSettlement>> list(AiPaymentSettlement query, Page<AiPaymentSettlement> page, HttpServletRequest req) {
+        return Result.OK(aiPaymentSettlementService.page(page, QueryGenerator.initQueryWrapper(query, req.getParameterMap())));
+    }
+
+    @ApiOperation("新增")
+    @PostMapping("/add")
+    public Result<String> add(@RequestBody AiPaymentSettlement entity) {
+        aiPaymentSettlementService.save(entity);
+        return Result.OK("ok");
+    }
+
+    @ApiOperation("修改")
+    @PostMapping("/edit")
+    public Result<String> edit(@RequestBody AiPaymentSettlement entity) {
+        aiPaymentSettlementService.updateById(entity);
+        return Result.OK("ok");
+    }
+
+    @ApiOperation("删除")
+    @DeleteMapping("/delete")
+    public Result<String> delete(@RequestParam Long id) {
+        aiPaymentSettlementService.removeById(id);
+        return Result.OK("ok");
+    }
+
+    @ApiOperation("根据ID查询")
+    @GetMapping("/queryById")
+    public Result<AiPaymentSettlement> queryById(@RequestParam Long id) {
+        return Result.OK(aiPaymentSettlementService.getById(id));
+    }
+}

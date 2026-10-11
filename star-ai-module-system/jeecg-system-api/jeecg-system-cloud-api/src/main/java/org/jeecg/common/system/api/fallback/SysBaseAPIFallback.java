@@ -33,10 +33,6 @@ public class SysBaseAPIFallback implements ISysBaseAPI {
   @Setter private Throwable cause;
 
   @Override
-    log.error("SendMessageFailed {}", cause);
-  }
-
-  @Override
   public void sendBusAnnouncement(BusMessageDTO message) {
     log.error("SendMessageFailed {}", cause);
   }
@@ -520,10 +516,6 @@ public class SysBaseAPIFallback implements ISysBaseAPI {
 
   @Override
   public Result<Boolean> verifyUsernameAndPassword(JSONObject sysLoginModel) {
-    return null;
-  }
-
-  @Override
     return null;
   }
 

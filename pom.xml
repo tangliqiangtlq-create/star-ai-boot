@@ -1053,6 +1053,12 @@
         <version>${mybatis.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        <version>${mybatis-plus.version}</version>
+      </dependency>
+
       <!--CVE-2023-6378 and others - consistent with logback.version; explicitly writing the BOM facilitates SCA identification-->
       <dependency>
         <groupId>ch.qos.logback</groupId>
@@ -1088,6 +1094,11 @@
         <artifactId>jeecg-system-biz</artifactId>
         <version>${jeecgboot.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jeecgframework.boot</groupId>
+        <artifactId>star-ai-system-biz</artifactId>
+        <version>${jeecgboot.version}</version>
+      </dependency>
 
       <!-- jeecg tools -->
       <dependency>
@@ -1101,6 +1112,11 @@
         <artifactId>jeecg-boot-base-core</artifactId>
         <version>${jeecgboot.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.jeecgframework.boot</groupId>
+        <artifactId>star-ai-boot-base-core</artifactId>
+        <version>${jeecgboot.version}</version>
+      </dependency>
       <!--
         G07 secrets backend (AESGCM/KMS decryption into the Spring Environment), shared by the WebMvc
         services through jeecg-boot-base-core and by the WebFlux gateway which cannot depend on base-core.
@@ -1108,6 +1124,11 @@
       <dependency>
         <groupId>org.jeecgframework.boot</groupId>
         <artifactId>jeecg-boot-starter-secrets</artifactId>
+        <version>${jeecgboot.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jeecgframework.boot</groupId>
+        <artifactId>star-ai-boot-starter-secrets</artifactId>
         <version>${jeecgboot.version}</version>
       </dependency>
       <!--system single (local) API-->
@@ -1120,6 +1141,18 @@
       <dependency>
         <groupId>org.jeecgframework.boot</groupId>
         <artifactId>jeecg-system-cloud-api</artifactId>
+        <version>${jeecgboot.version}</version>
+      </dependency>
+      <!--system single (local) API - star-ai renamed-->
+      <dependency>
+        <groupId>org.jeecgframework.boot</groupId>
+        <artifactId>star-ai-system-local-api</artifactId>
+        <version>${jeecgboot.version}</version>
+      </dependency>
+      <!--system microservice (cloud) API - star-ai renamed-->
+      <dependency>
+        <groupId>org.jeecgframework.boot</groupId>
+        <artifactId>star-ai-system-cloud-api</artifactId>
         <version>${jeecgboot.version}</version>
       </dependency>
 

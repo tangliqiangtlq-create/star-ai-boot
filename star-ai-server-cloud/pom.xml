@@ -16,17 +16,10 @@
     <description>Star AI 微服务层聚合工程</description>
 
     <modules>
-        <!-- 基础设施 -->
         <module>star-ai-cloud-gateway</module>
-        <module>star-ai-system-cloud-start</module>
-        <module>star-ai-visual</module>
-
-        <!-- AI 短剧业务微服务 -->
-        <module>star-ai-module-generate</module>
-        <module>star-ai-module-content</module>
-        <module>star-ai-module-provider</module>
-        <module>star-ai-module-billing</module>
-        <module>star-ai-module-team</module>
-        <module>star-ai-module-task</module>
+        <module>star-ai-module-payment</module>
+        <module>star-ai-module-creator</module>
+        <module>star-ai-module-stream</module>
+        <module>star-ai-transcode-worker</module>
     </modules>
 </project>
