@@ -12,7 +12,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jeecgframework.boot</groupId>
-            <artifactId>jeecg-boot-base-core</artifactId>
+            <artifactId>star-ai-boot-base-core</artifactId>
             <version>3.7.0</version>
         </dependency>
     </dependencies>

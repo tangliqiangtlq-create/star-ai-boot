@@ -46,6 +46,8 @@ star-ai-server-cloud/
 | **Creator 模块修复** | CreatorController / VideoController / MinioPresignServiceImpl 花括号外代码截断 | 4 Java |
 | **Stream 模块修复** | Interaction / WatchHistory / CreatorPage / Collections Controller + StreamVideoMapper | 5 Java |
 | **Transcode 修复** | generatePreview 调用位置 + 参数 | 1 Java |
+| **跨云厂商存储抽象层** | base-core 新增 `IObjectStorageService` 接口 + Creator/Transcode 各一份 MinIO 实现，`@ConditionalOnProperty("storage.type=minio")` 切换 | 5 Java |
+| **artifactId 统一修复** | 8 个 biz/api pom `jeecg-boot-base-core` → `star-ai-boot-base-core`（Phase 1 隐藏 bug，`~/.m2` 旧 jar 蒙混过关） | 8 pom.xml |
 | **编译验证** | `mvn clean install -Dmaven.test.skip=true -pl ... -am` **20 模块全 SUCCESS** | — |
 
 ---
@@ -172,6 +174,38 @@ AgeVerifyFilter         (Ordered.HIGHEST_PRECEDENCE - 50)   → 18+ 拦截
 
 **文件**：`star-ai-cloud-gateway/src/main/java/org/jeecg/filter/AgeVerifyFilter.java`
 
+### 4.7 跨云厂商存储适配架构（Phase 1.5 新增）
+
+```
+消费层                         抽象层                               实现层（可扩展）
+─────────                    ──────────                          ──────────────
+MinioPresignServiceImpl ──┐
+TranscodeServiceImpl  ────┼──▶ IObjectStorageService ──▶ @ConditionalOnProperty("storage.type=xxx")
+                            (base-core)                        ├── minio  → MinioObjectStorageImpl (creator + transcode 各一份)
+                                                              ├── aliyun → AliyunOssObjectStorageImpl (待实现)
+                                                              ├── tencent → TencentCosObjectStorageImpl (待实现)
+                                                              └── huawei → HuaweiObsObjectStorageImpl (待实现)
+```
+
+**接口方法（base-core `org.jeecg.common.storage.IObjectStorageService`）**：
+
+| 方法 | 用途 | 当前调用方 |
+|------|------|-----------|
+| `generateUploadPresign(bucket, key, expiry)` | PUT 预签名 URL | Creator 分片上传 |
+| `generateDownloadPresign(bucket, key, expiry)` | GET 预签名 URL | Transcode 下载原视频 |
+| `uploadDirectory(localDir, bucket, prefix)` | 整目录上传 | Transcode 推 HLS 产物 |
+| `uploadFile(localFile, bucket, key)` | 单文件上传 | 预留 |
+| `deleteObject / deleteDirectory` | 清理 | 预留 |
+| `getObject / listObjects` | 读取 | 预留 |
+
+**切换方式**：
+```yaml
+# application.yml
+storage.type: minio     # minio / aliyun / tencent / huawei
+```
+
+播放链路（Stream 模块）**天然解耦**——`stream_video` 表只存 `hls_master_key`（路径），播放器直接拼 CDN URL 拉流，完全不知道底层是 MinIO / OSS / TOS / S3。
+
 ---
 
 ## 五、关键技术约束（踩过的坑）
@@ -188,6 +222,7 @@ AgeVerifyFilter         (Ordered.HIGHEST_PRECEDENCE - 50)   → 18+ 拦截
 | 8 | **MinIO 双 bucket** | `stream-creator-draft`（上传）→ `stream-published`（HLS 最终）+ `stream-preview`（试看） |
 | 9 | **system-api module 目录名** | pom.xml `<module>` 写**目录名**（`jeecg-system-local-api`），**不是** artifactId（`star-ai-system-local-api`） |
 | 10 | **testCompile 跳过** | `-DskipTests` 只跳过执行，**不跳过编译**。用 `-Dmaven.test.skip=true` 才同时跳过 testCompile + test |
+| 11 | **artifactId 必须一致** | base-core 的 artifactId 已改为 `star-ai-boot-base-core`，但 Phase 1 遗留 8 个 pom 还写着 `jeecg-boot-base-core`——构建能过纯属 `~/.m2` 旧 jar 蒙混。新增任何 base-core 功能（如 `IObjectStorageService`）都会找不到新类。**所有 biz pom 必须统一用 `star-ai-boot-base-core`** |
 
 ---
 

@@ -1,14 +1,14 @@
 package org.jeecg.creator.service.impl;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.http.Method;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.jeecg.common.storage.IObjectStorageService;
 import org.jeecg.creator.config.MinioConfig;
 import org.jeecg.creator.dto.PresignReq;
 import org.jeecg.creator.dto.PresignResp;
 import org.jeecg.creator.service.IMinioPresignService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -17,8 +17,10 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MinioPresignServiceImpl implements IMinioPresignService {
-    private final MinioClient minioClient;
+
+    private final IObjectStorageService storageService;
     private final MinioConfig minioConfig;
+
     private static final int CHUNK_SIZE = 5 * 1024 * 1024;
     private static final int MAX_CHUNKS = 100;
 
@@ -33,20 +35,14 @@ public class MinioPresignServiceImpl implements IMinioPresignService {
         for (int i = 0; i < totalChunks; i++) {
             String chunkKey = objectKey + ".part" + String.format("%03d", i);
             try {
-                String url = minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                        .method(Method.PUT)
-                        .bucket(minioConfig.getDraftBucket())
-                        .object(chunkKey)
-                        .expiry(minioConfig.getPresignExpireSec())
-                        .build()
-                );
+                String url = storageService.generateUploadPresign(
+                    minioConfig.getDraftBucket(), chunkKey, minioConfig.getPresignExpireSec());
                 PresignResp.ChunkUrl cu = new PresignResp.ChunkUrl();
                 cu.setIndex(i);
                 cu.setUrl(url);
                 chunks.add(cu);
             } catch (Exception e) {
-                log.error("生成 MinIO presign chunk 失败, index=" + i, e);
+                log.error("生成存储 presign chunk 失败, index=" + i, e);
             }
         }
         PresignResp resp = new PresignResp();

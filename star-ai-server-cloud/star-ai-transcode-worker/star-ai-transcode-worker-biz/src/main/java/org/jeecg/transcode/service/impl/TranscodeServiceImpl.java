@@ -1,11 +1,7 @@
 package org.jeecg.transcode.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
-import io.minio.http.Method;
+import org.jeecg.common.storage.IObjectStorageService;
 import org.jeecg.transcode.config.MinioConfig;
 import org.jeecg.transcode.config.TranscodeConfig;
 import org.jeecg.transcode.dto.VideoUploadedMsg;
@@ -32,7 +28,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TranscodeServiceImpl implements ITranscodeService {
 
-    private final MinioClient minioClient;
+    private final IObjectStorageService storageService;
     private final MinioConfig minioConfig;
     private final TranscodeConfig transcodeConfig;
     private final IStreamVideoService streamVideoService;
@@ -60,14 +56,8 @@ public class TranscodeServiceImpl implements ITranscodeService {
             Path workDir = Paths.get(transcodeConfig.getWorkDir(), String.valueOf(videoId));
             Files.createDirectories(workDir);
 
-            String downloadUrl = minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                    .method(Method.GET)
-                    .bucket(msg.getBucket())
-                    .object(msg.getOriginalKey())
-                    .expiry(minioConfig.getDownloadExpireSec())
-                    .build()
-            );
+            String downloadUrl = storageService.generateDownloadPresign(
+                msg.getBucket(), msg.getOriginalKey(), minioConfig.getDownloadExpireSec());
 
             Path inputFile = workDir.resolve("input.mp4");
             downloadWithCurl(downloadUrl, inputFile.toAbsolutePath().toString());
@@ -190,24 +180,7 @@ public class TranscodeServiceImpl implements ITranscodeService {
     }
 
     private void uploadDirToMinio(Path localDir, String prefix, String bucket) throws Exception {
-        List<Path> files = Files.walk(localDir)
-            .filter(Files::isRegularFile)
-            .collect(Collectors.toList());
-
-        for (Path file : files) {
-            String relativePath = localDir.relativize(file).toString();
-            String objectKey = prefix + "/" + relativePath;
-
-            log.info("上传 MinIO: bucket={}, key={}", bucket, objectKey);
-
-            minioClient.putObject(
-                PutObjectArgs.builder()
-                    .bucket(bucket)
-                    .object(objectKey)
-                    .stream(Files.newInputStream(file), Files.size(file), -1)
-                    .build()
-            );
-        }
+        storageService.uploadDirectory(localDir, bucket, prefix);
     }
 
 private boolean generatePreview(String input, String outDir, String preset, String height, int bitrateKbps) {
