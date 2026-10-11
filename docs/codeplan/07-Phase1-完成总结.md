@@ -2,7 +2,7 @@
 
 > 完成日期：2026-10-12
 > 构建状态：**20 模块 BUILD SUCCESS** ✅
-> Commit：`55b695b` feat: Phase1 骨架 + 全链路编译通过
+> Commit：`d05da01` feat: IObjectStorageService 跨云厂商存储抽象层 + artifactId 统一修复
 
 ---
 
