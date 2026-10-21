@@ -23,7 +23,7 @@ public class PaymentSuccessConsumer {
     private final IRevenueSettlementService settlementService;
     private final StringRedisTemplate redisTemplate;
 
-    @RabbitListener(queues = "#{q.payment.success}")
+    @RabbitListener(queues = "q.payment.success")
     public void onPaymentSuccess(Message message, Channel channel) throws IOException {
         long tag = message.getMessageProperties().getDeliveryTag();
         String body = new String(message.getBody());

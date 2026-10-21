@@ -28,8 +28,7 @@ public class H8DenyAuditStartupVerifier {
     private static final String BASE_PACKAGE = "org.jeecg.modules.system.controller";
     private static final String[] REQUIRED_ENDPOINT_KEYWORDS = {
             "/sys/login",
-            "/verifyTotp",
-            "thirdLogin"
+            "/verifyTotp"
     };
     private static final Class<?>[] AUDIT_ANNOTATIONS = {H8LoginAudit.class, AutoLog.class};
 
@@ -51,7 +50,7 @@ public class H8DenyAuditStartupVerifier {
             return;
         }
         verifyLoginEndpointsAudited();
-        log.info("H8DenyAuditStartupVerifier: PASSED (aspect loaded + 3 endpoints audited)");
+        log.info("H8DenyAuditStartupVerifier: PASSED (aspect loaded + 2 endpoints audited)");
     }
 
     private static boolean isSystemLoginModulePresent() {

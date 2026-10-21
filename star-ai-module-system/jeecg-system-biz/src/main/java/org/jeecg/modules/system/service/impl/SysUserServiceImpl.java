@@ -146,20 +146,54 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
   private static final Set<String> REQUIRED_FIELDS_FOR_DEPART_IDS =
       Set.of("userIdentity", "departIds", "updateBy", "updateTime");
 
-  @Autowired
-  @Autowired
-
   private static final String SHARD_SYNC_USER_CHANNEL = "shard-sync:sys-user-change";
 
-
-
-
+  @Autowired
+  private SysUserMapper userMapper;
+  @Autowired
+  private SysPermissionMapper sysPermissionMapper;
+  @Autowired
+  private SysUserRoleMapper sysUserRoleMapper;
+  @Autowired
+  private SysUserDepartMapper sysUserDepartMapper;
+  @Autowired
+  private SysDepartMapper sysDepartMapper;
+  @Autowired
+  private SysRoleMapper sysRoleMapper;
+  @Resource
+  private BaseCommonService baseCommonService;
+  @Autowired
+  private SysUserTenantMapper relationMapper;
+  @Autowired
+  private SysUserTenantMapper userTenantMapper;
+  @Autowired
+  private SysUserPositionMapper sysUserPositionMapper;
+  @Autowired
+  private SysPositionMapper sysPositionMapper;
+  @Autowired
+  private SystemSendMsgHandle systemSendMsgHandle;
+  @Autowired
+  private RedisUtil redisUtil;
+  @Autowired
+  private OTPHasher otpHasher;
+  @Autowired
+  private MessageSource messageSource;
+  @Resource
+  private IBusinessRuleService businessRuleService;
   @Lazy
-
-
-
-
+  @Autowired
+  private CommonAPI commonAPI;
+  @Autowired
+  private SysTenantMapper sysTenantMapper;
+  @Autowired(required = false)
+  private org.jeecg.common.system.passwordreset.PasswordResetLinkFacade passwordResetLinkFacade;
+  @Autowired
+  private SessionKickService sessionKickService;
   @Lazy
+  @Autowired(required = false)
+  private IDcsShardClient dcsApi;
+  @Autowired
+  private org.springframework.data.redis.core.RedisTemplate<String, Object> shardRedisTemplate;
 
   @Override
   public Result<IPage<SysUser>> queryPageList(
@@ -774,21 +808,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
         new QueryWrapper<SysUserDepart>().lambda().eq(SysUserDepart::getUserId, user.getId()));
     if (userDepartList != null && userDepartList.size() > 0) {
       for (SysUserDepart depart : userDepartList) {
-        // When linked department changes, remove department-user-role relations
-        if (!Arrays.asList(arr).contains(depart.getDepId())) {
-    // NOTE: cleaned - List<SysDepartRole> sysDepartRoleList = sysDepartRoleMapper.selectList(
-              // NOTE: cleaned - new QueryWrapper<SysDepartRole>()
-                  .lambda()
-    // NOTE: cleaned - .eq(SysDepartRole::getDepartId, depart.getDepId()));
-    // NOTE: cleaned - List<String> roleIds = sysDepartRoleList.stream().map(SysDepartRole::getId).collect(Collectors.toList());
-          if (roleIds != null && roleIds.size() > 0) {
-            departRoleUserMapper.delete(
-                // NOTE: cleaned - new QueryWrapper<SysDepartRoleUser>()
-                    .lambda()
-    // NOTE: cleaned - .eq(SysDepartRoleUser::getUserId, user.getId())
-    // NOTE: cleaned - .in(SysDepartRoleUser::getDroleId, roleIds));
-          }
-        }
+        
       }
     }
     // Delete then insert
@@ -1036,21 +1056,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
         new QueryWrapper<SysUserDepart>().lambda().eq(SysUserDepart::getUserId, user.getId()));
     if (userDepartList != null && userDepartList.size() > 0) {
       for (SysUserDepart depart : userDepartList) {
-        // When linked department changes, remove department-user-role relations
-        if (!Arrays.asList(arr).contains(depart.getDepId())) {
-    // NOTE: cleaned - List<SysDepartRole> sysDepartRoleList = sysDepartRoleMapper.selectList(
-              // NOTE: cleaned - new QueryWrapper<SysDepartRole>()
-                  .lambda()
-    // NOTE: cleaned - .eq(SysDepartRole::getDepartId, depart.getDepId()));
-    // NOTE: cleaned - List<String> roleIds = sysDepartRoleList.stream().map(SysDepartRole::getId).collect(Collectors.toList());
-          if (roleIds != null && roleIds.size() > 0) {
-            departRoleUserMapper.delete(
-                // NOTE: cleaned - new QueryWrapper<SysDepartRoleUser>()
-                    .lambda()
-    // NOTE: cleaned - .eq(SysDepartRoleUser::getUserId, user.getId())
-    // NOTE: cleaned - .in(SysDepartRoleUser::getDroleId, roleIds));
-          }
-        }
+        
       }
     }
     // Delete then insert
@@ -1741,21 +1747,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     List<SysUserDepart> userDepartList = sysUserDepartMapper.getTenantUserDepart(user.getId(), tenantId);
     if (userDepartList != null && userDepartList.size() > 0 && departList.size() > 0) {
       for (SysUserDepart depart : userDepartList) {
-        // When linked department changes, remove department-user-role relations
-        if (!departList.contains(depart.getDepId())) {
-    // NOTE: cleaned - List<SysDepartRole> sysDepartRoleList = sysDepartRoleMapper.selectList(
-              // NOTE: cleaned - new QueryWrapper<SysDepartRole>()
-                  .lambda()
-    // NOTE: cleaned - .eq(SysDepartRole::getDepartId, depart.getDepId()));
-    // NOTE: cleaned - List<String> roleIds = sysDepartRoleList.stream().map(SysDepartRole::getId).collect(Collectors.toList());
-          if (roleIds.size() > 0) {
-            departRoleUserMapper.delete(
-                // NOTE: cleaned - new QueryWrapper<SysDepartRoleUser>()
-                    .lambda()
-    // NOTE: cleaned - .eq(SysDepartRoleUser::getUserId, user.getId())
-    // NOTE: cleaned - .in(SysDepartRoleUser::getDroleId, roleIds));
-          }
-        }
+        
       }
     }
     long endTime1 = System.currentTimeMillis();

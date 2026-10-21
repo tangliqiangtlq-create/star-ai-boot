@@ -78,10 +78,21 @@ public class SysDictServiceImpl extends ServiceImpl<SysDictMapper, SysDict> impl
     private static final Set<String> REQUIRED_FIELDS_FOR_THIS_TABLE =
         Set.of("delFlag", "updateBy", "updateTime");
 
+    @Autowired
+    private SysDictMapper sysDictMapper;
+    @Autowired
+    private SysDictItemMapper sysDictItemMapper;
+    @Autowired
+    private DictQueryBlackListHandler dictQueryBlackListHandler;
+    @Autowired
+    private ISysDictItemService sysDictItemService;
+    @Lazy
+    @Autowired
+    private ISysBaseAPI sysBaseAPI;
+    @Lazy
+    @Autowired
+    private RedisUtil redisUtil;
 
-	@Lazy
-	@Lazy
-	@Lazy
 	@Override
 	public boolean duplicateCheckData(DuplicateCheckVo duplicateCheckVo) {
 		Long count = null;

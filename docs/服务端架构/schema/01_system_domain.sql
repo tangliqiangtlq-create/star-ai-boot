@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 数据库建表脚本
 -- Part 01 · 系统管理域 sys_* (13 张表)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -178,8 +178,8 @@ CREATE TABLE `sys_permission` (
   KEY `idx_parent` (`parent_id`),
   KEY `idx_type` (`permission_type`),
   KEY `idx_api_method_path` (`api_method`, `api_path`)                                   COMMENT 'API 权限快速匹配',
-  CONSTRAINT `chk_permission_type` CHECK (`permission_type` IN (0,1,2,3)),
-  CONSTRAINT `chk_api_method` CHECK (`api_method` IS NULL OR `api_method` IN ('GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'))
+  CHECK (`permission_type` IN (0,1,2,3)),
+  CHECK (`api_method` IS NULL OR `api_method` IN ('GET','POST','PUT','DELETE','PATCH','OPTIONS','HEAD'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='权限 (目录 / 菜单 / 按钮 / API 四类统一存储)';
 
@@ -242,7 +242,7 @@ CREATE TABLE `sys_permission_data_rule` (
   PRIMARY KEY (`id`),
   KEY `idx_role` (`role_id`),
   KEY `idx_permission` (`permission_id`),
-  CONSTRAINT `chk_rule_operator` CHECK (`rule_operator` IN ('=','!=','IN','NOT IN','LIKE','NOT LIKE','BETWEEN','>','<','>=','<='))
+  CHECK (`rule_operator` IN ('=','!=','IN','NOT IN','LIKE','NOT LIKE','BETWEEN','>','<','>=','<='))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='数据权限规则 (MyBatis 拦截器自动注入 WHERE 条件, 实现行级隔离)';
 
@@ -270,7 +270,7 @@ CREATE TABLE `sys_user_mfa` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_mfa_type` (`user_id`, `mfa_type`, `del_flag`),
   KEY `idx_user` (`user_id`),
-  CONSTRAINT `chk_mfa_type` CHECK (`mfa_type` IN (1,2,3,4))
+  CHECK (`mfa_type` IN (1,2,3,4))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='用户 MFA 配置 (密钥不可逆 Hash 存储, 绝不明文)';
 
@@ -367,7 +367,7 @@ CREATE TABLE `sys_data_log` (
   KEY `idx_action` (`action`),
   KEY `idx_create_time` (`create_time`),
   KEY `idx_operator` (`operator_id`),
-  CONSTRAINT `chk_action` CHECK (`action` IN (1,2,3))
+  CHECK (`action` IN (1,2,3))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='数据变更日志 (字段级审计, UPDATE 时只记录 diff)';
 

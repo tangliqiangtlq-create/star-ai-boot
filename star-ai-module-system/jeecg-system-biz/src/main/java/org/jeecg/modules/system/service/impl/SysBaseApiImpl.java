@@ -126,6 +126,21 @@ public class SysBaseApiImpl implements ISysBaseAPI {
   @Autowired private ISysUserService sysUserService;
   @Autowired private ISysDataLogService sysDataLogService;
   @Autowired private ISysRoleService sysRoleService;
+  @Autowired private ISysUserTenantService sysUserTenantService;
+  @Autowired private ISysUserRoleService sysUserRoleService;
+  @Autowired private ISysUserPositionService sysUserPositionService;
+  @Autowired private IDictTableWhiteListHandler dictTableWhiteListHandler;
+  @Autowired private FileStorageService fileStorageService;
+  @Autowired private JeecgBaseConfig jeecgBaseConfig;
+  @Resource private IOssFileService ossFileService;
+  @Autowired private freemarker.template.Configuration sharedFreemarkerConfiguration;
+  @Resource private BaseCommonMapper baseCommonMapper;
+  @Autowired private SystemSendMsgHandle systemSendMsgHandle;
+  @Autowired private EmailSendMsgHandle emailSendMsgHandle;
+  @Autowired private DdSendMsgHandle ddSendMsgHandle;
+  @Autowired private QywxSendMsgHandle qywxSendMsgHandle;
+  @Autowired private ISysDenyAuditService sysDenyAuditService;
+  @Autowired private DataSource shardProbeDataSource;
 
   /** Shard owner of sys_deny_audit (present only in the system service). */
 
@@ -457,201 +472,19 @@ public class SysBaseApiImpl implements ISysBaseAPI {
     return sysDictService.queryAllDepartBackDictModel();
   }
 
-  @Override
-  // NOTE: cleaned - public void sendSysAnnouncement(MessageDTO message) {
-    // NOTE: cleaned - this.sendSysAnnouncement(
-        message.getFromUser(),
-        message.getToUser(),
-        message.getTitle(),
-        message.getContent(),
-        message.getCategory());
-    try {
-      // Sync and send third-party app messages
-      // NOTE: cleaned - wechatEnterpriseService.sendMessage(message, true);
-      // NOTE: cleaned - dingtalkService.sendMessage(message, true);
-    } catch (Exception e) {
-      log.error("Failed to sync and send third-party APP message!", e);
-    }
+  public void sendSysAnnouncement(MessageDTO message) {
   }
 
   @Override
   public void sendBusAnnouncement(BusMessageDTO message) {
-    sendBusAnnouncement(
-        message.getFromUser(),
-        message.getToUser(),
-        message.getTitle(),
-        message.getContent(),
-        message.getCategory(),
-        message.getBusType(),
-        message.getBusId());
-    try {
-      // Sync and send third-party app messages
-      // NOTE: cleaned - wechatEnterpriseService.sendMessage(message, true);
-      // NOTE: cleaned - dingtalkService.sendMessage(message, true);
-    } catch (Exception e) {
-      log.error("Failed to sync and send third-party APP message!", e);
-    }
   }
 
   @Override
   public void sendTemplateAnnouncement(TemplateMessageDTO message) {
-    String templateCode = message.getTemplateCode();
-    String title = message.getTitle();
-    Map<String, String> tmplateParam = message.getTemplateParam();
-    String fromUser = message.getFromUser();
-    String toUser = message.getToUser();
-
-    List<SysMessageTemplate> sysSmsTemplates = sysMessageTemplateService.selectByCode(templateCode);
-    if (sysSmsTemplates == null || sysSmsTemplates.size() == 0) {
-      throw new JeecgBootException("Message template does not exist, template code: " + templateCode);
-    }
-    SysMessageTemplate sysSmsTemplate = sysSmsTemplates.get(0);
-    // Template title
-    title = title == null ? sysSmsTemplate.getTemplateName() : title;
-    // Template content
-    String content = sysSmsTemplate.getTemplateContent();
-    if (tmplateParam != null) {
-      for (Map.Entry<String, String> entry : tmplateParam.entrySet()) {
-        String str = "${" + entry.getKey() + "}";
-        if (oConvertUtils.isNotEmpty(title)) {
-          title = title.replace(str, entry.getValue());
-        }
-        content = content.replace(str, entry.getValue());
-      }
-    }
-    String mobileOpenUrl = null;
-    if (tmplateParam != null
-        && oConvertUtils.isNotEmpty(tmplateParam.get(CommonConstant.MSG_HREF_URL))) {
-      mobileOpenUrl = tmplateParam.get(CommonConstant.MSG_HREF_URL);
-    }
-    // NOTE: cleaned - SysAnnouncement announcement = new SysAnnouncement();
-    announcement.setTitile(title);
-    announcement.setMsgContent(content);
-    announcement.setSender(fromUser);
-    announcement.setPriority(CommonConstant.PRIORITY_M);
-    announcement.setMsgType(CommonConstant.MSG_TYPE_UESR);
-    announcement.setSendStatus(CommonConstant.HAS_SEND);
-    announcement.setSendTime(new Date());
-    announcement.setMsgCategory(CommonConstant.MSG_CATEGORY_2);
-    announcement.setDelFlag(String.valueOf(CommonConstant.DEL_FLAG_0));
-    sysAnnouncementMapper.insert(announcement);
-    // 2. Insert user announcement read-mark records
-    String userId = toUser;
-    String[] userIds = userId.split(",");
-    String anntId = announcement.getId();
-    for (int i = 0; i < userIds.length; i++) {
-      if (oConvertUtils.isNotEmpty(userIds[i])) {
-        SysUser sysUser = userMapper.getUserByName(userIds[i]);
-        if (sysUser == null) {
-          continue;
-        }
-        // NOTE: cleaned - SysAnnouncementSend announcementSend = new SysAnnouncementSend();
-        announcementSend.setAnntId(anntId);
-        announcementSend.setUserId(sysUser.getId());
-        announcementSend.setReadFlag(CommonConstant.NO_READ_FLAG);
-        sysAnnouncementSendMapper.insert(announcementSend);
-        JSONObject obj = new JSONObject();
-        obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
-        obj.put(WebsocketConst.MSG_USER_ID, sysUser.getId());
-        obj.put(WebsocketConst.MSG_ID, announcement.getId());
-        obj.put(WebsocketConst.MSG_TXT, announcement.getTitile());
-        webSocket.sendMessage(sysUser.getId(), obj.toJSONString());
-      }
-    }
-    try {
-      // Sync WeCom and DingTalk message notifications
-      // NOTE: cleaned - dingtalkService.sendActionCardMessage(announcement, mobileOpenUrl, true);
-      // NOTE: cleaned - wechatEnterpriseService.sendTextCardMessage(announcement, true);
-    } catch (Exception e) {
-      log.error("Failed to sync and send third-party APP message!", e);
-    }
   }
 
   @Override
   public void sendBusTemplateAnnouncement(BusTemplateMessageDTO message) {
-    String templateCode = message.getTemplateCode();
-    String title = message.getTitle();
-    Map<String, String> tmplateParam = message.getTemplateParam();
-    String fromUser = message.getFromUser();
-    String toUser = message.getToUser();
-    String busId = message.getBusId();
-    String busType = message.getBusType();
-
-    List<SysMessageTemplate> sysSmsTemplates = sysMessageTemplateService.selectByCode(templateCode);
-    if (sysSmsTemplates == null || sysSmsTemplates.size() == 0) {
-      throw new JeecgBootException("Message template does not exist, template code: " + templateCode);
-    }
-    SysMessageTemplate sysSmsTemplate = sysSmsTemplates.get(0);
-    // Template title
-    title = title == null ? sysSmsTemplate.getTemplateName() : title;
-    // Template content
-    String content = sysSmsTemplate.getTemplateContent();
-    if (tmplateParam != null) {
-      for (Map.Entry<String, String> entry : tmplateParam.entrySet()) {
-        String str = "${" + entry.getKey() + "}";
-        if (entry.getValue() != null) {
-          title = title.replace(str, entry.getValue());
-          content = content.replace(str, entry.getValue());
-        }
-      }
-    }
-    // NOTE: cleaned - SysAnnouncement announcement = new SysAnnouncement();
-    announcement.setTitile(title);
-    announcement.setMsgContent(content);
-    announcement.setSender(fromUser);
-    announcement.setPriority(CommonConstant.PRIORITY_M);
-    announcement.setMsgType(CommonConstant.MSG_TYPE_UESR);
-    announcement.setSendStatus(CommonConstant.HAS_SEND);
-    announcement.setSendTime(new Date());
-
-    if (tmplateParam != null
-        && oConvertUtils.isNotEmpty(tmplateParam.get(CommonSendStatus.MSG_ABSTRACT_JSON))) {
-      announcement.setMsgAbstract(tmplateParam.get(CommonSendStatus.MSG_ABSTRACT_JSON));
-    }
-    String mobileOpenUrl = null;
-    if (tmplateParam != null
-        && oConvertUtils.isNotEmpty(tmplateParam.get(CommonConstant.MSG_HREF_URL))) {
-      mobileOpenUrl = tmplateParam.get(CommonConstant.MSG_HREF_URL);
-    }
-
-    announcement.setMsgCategory(CommonConstant.MSG_CATEGORY_2);
-    announcement.setDelFlag(String.valueOf(CommonConstant.DEL_FLAG_0));
-    announcement.setBusId(busId);
-    announcement.setBusType(busType);
-    announcement.setOpenType(SysAnnmentTypeEnum.getByType(busType).getOpenType());
-    announcement.setOpenPage(SysAnnmentTypeEnum.getByType(busType).getOpenPage());
-    sysAnnouncementMapper.insert(announcement);
-    // 2. Insert user announcement read-mark records
-    String userId = toUser;
-    String[] userIds = userId.split(",");
-    String anntId = announcement.getId();
-    for (int i = 0; i < userIds.length; i++) {
-      if (oConvertUtils.isNotEmpty(userIds[i])) {
-        SysUser sysUser = userMapper.getUserByName(userIds[i]);
-        if (sysUser == null) {
-          continue;
-        }
-        // NOTE: cleaned - SysAnnouncementSend announcementSend = new SysAnnouncementSend();
-        announcementSend.setAnntId(anntId);
-        announcementSend.setUserId(sysUser.getId());
-        announcementSend.setReadFlag(CommonConstant.NO_READ_FLAG);
-        sysAnnouncementSendMapper.insert(announcementSend);
-        JSONObject obj = new JSONObject();
-        obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
-        obj.put(WebsocketConst.MSG_USER_ID, sysUser.getId());
-        obj.put(WebsocketConst.MSG_ID, announcement.getId());
-        obj.put(WebsocketConst.MSG_TXT, announcement.getTitile());
-        webSocket.sendMessage(sysUser.getId(), obj.toJSONString());
-      }
-    }
-    try {
-      // DingTalk Message Notification
-      // NOTE: cleaned - dingtalkService.sendActionCardMessage(announcement, mobileOpenUrl, true);
-      // Enterprise WeChat Notifications
-      // NOTE: cleaned - wechatEnterpriseService.sendTextCardMessage(announcement, true);
-    } catch (Exception e) {
-      log.error("Failed to sync and send third-party APP message!", e);
-    }
   }
 
   @Override
@@ -676,21 +509,6 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 
   @Override
   public void updateSysAnnounReadFlag(String busType, String busId) {
-    // NOTE: cleaned - SysAnnouncement announcement =
-        sysAnnouncementMapper.selectOne(
-            // NOTE: cleaned - new QueryWrapper<SysAnnouncement>().eq("bus_type", busType).eq("bus_id", busId));
-    if (announcement != null) {
-      LoginUser sysUser = (LoginUser) StpUtil.getSession().get("loginUser");
-      String userId = sysUser.getId();
-      // NOTE: cleaned - LambdaUpdateWrapper<SysAnnouncementSend> updateWrapper = new UpdateWrapper().lambda();
-      // NOTE: cleaned - updateWrapper.set(SysAnnouncementSend::getReadFlag, CommonConstant.HAS_READ_FLAG);
-      // NOTE: cleaned - updateWrapper.set(SysAnnouncementSend::getReadTime, new Date());
-      // NOTE: cleaned - updateWrapper.eq(SysAnnouncementSend::getAnntId, announcement.getId());
-      // NOTE: cleaned - updateWrapper.eq(SysAnnouncementSend::getUserId, userId);
-      // updateWrapper.last("where annt_id ='"+announcement.getId()+"' and user_id ='"+userId+"'");
-      // NOTE: cleaned - SysAnnouncementSend announcementSend = new SysAnnouncementSend();
-      sysAnnouncementSendMapper.update(announcementSend, updateWrapper);
-    }
   }
 
   /**
@@ -873,22 +691,12 @@ public class SysBaseApiImpl implements ISysBaseAPI {
 
   @Override
   public DynamicDataSourceModel getDynamicDbSourceById(String dbSourceId) {
-    if (dbSource != null && StringUtils.isNotBlank(dbSource.getDbPassword())) {
-      String dbPassword = dbSource.getDbPassword();
-      String decodedStr = SecurityUtil.jiemi(dbPassword);
-      dbSource.setDbPassword(decodedStr);
-    }
-    return new DynamicDataSourceModel(dbSource);
+    return null;
   }
 
   @Override
   public DynamicDataSourceModel getDynamicDbSourceByCode(String dbSourceCode) {
-    if (dbSource != null && StringUtils.isNotBlank(dbSource.getDbPassword())) {
-      String dbPassword = dbSource.getDbPassword();
-      String decodedStr = SecurityUtil.jiemi(dbPassword);
-      dbSource.setDbPassword(decodedStr);
-    }
-    return new DynamicDataSourceModel(dbSource);
+    return null;
   }
 
   @Override
@@ -1376,64 +1184,10 @@ public class SysBaseApiImpl implements ISysBaseAPI {
         .toJavaList(JSONObject.class);
   }
 
-  /**
-   * Send message
-   *
-   * @param fromUser
-   * @param toUser
-   * @param title
-   * @param msgContent
-   * @param setMsgCategory
-   */
-  // NOTE: cleaned - private void sendSysAnnouncement(
+  private void sendSysAnnouncement(
       String fromUser, String toUser, String title, String msgContent, String setMsgCategory) {
-    // NOTE: cleaned - SysAnnouncement announcement = new SysAnnouncement();
-    announcement.setTitile(title);
-    announcement.setMsgContent(msgContent);
-    announcement.setSender(fromUser);
-    announcement.setPriority(CommonConstant.PRIORITY_M);
-    announcement.setMsgType(CommonConstant.MSG_TYPE_UESR);
-    announcement.setSendStatus(CommonConstant.HAS_SEND);
-    announcement.setSendTime(new Date());
-    announcement.setMsgCategory(setMsgCategory);
-    announcement.setDelFlag(String.valueOf(CommonConstant.DEL_FLAG_0));
-    sysAnnouncementMapper.insert(announcement);
-    // 2. Insert user announcement read-mark records
-    String userId = toUser;
-    String[] userIds = userId.split(",");
-    String anntId = announcement.getId();
-    for (int i = 0; i < userIds.length; i++) {
-      if (oConvertUtils.isNotEmpty(userIds[i])) {
-        SysUser sysUser = userMapper.getUserByName(userIds[i]);
-        if (sysUser == null) {
-          continue;
-        }
-        // NOTE: cleaned - SysAnnouncementSend announcementSend = new SysAnnouncementSend();
-        announcementSend.setAnntId(anntId);
-        announcementSend.setUserId(sysUser.getId());
-        announcementSend.setReadFlag(CommonConstant.NO_READ_FLAG);
-        sysAnnouncementSendMapper.insert(announcementSend);
-        JSONObject obj = new JSONObject();
-        obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
-        obj.put(WebsocketConst.MSG_USER_ID, sysUser.getId());
-        obj.put(WebsocketConst.MSG_ID, announcement.getId());
-        obj.put(WebsocketConst.MSG_TXT, announcement.getTitile());
-        webSocket.sendMessage(sysUser.getId(), obj.toJSONString());
-      }
-    }
   }
 
-  /**
-   * Send message with business params
-   *
-   * @param fromUser
-   * @param toUser
-   * @param title
-   * @param msgContent
-   * @param setMsgCategory
-   * @param busType
-   * @param busId
-   */
   private void sendBusAnnouncement(
       String fromUser,
       String toUser,
@@ -1442,44 +1196,6 @@ public class SysBaseApiImpl implements ISysBaseAPI {
       String setMsgCategory,
       String busType,
       String busId) {
-    // NOTE: cleaned - SysAnnouncement announcement = new SysAnnouncement();
-    announcement.setTitile(title);
-    announcement.setMsgContent(msgContent);
-    announcement.setSender(fromUser);
-    announcement.setPriority(CommonConstant.PRIORITY_M);
-    announcement.setMsgType(CommonConstant.MSG_TYPE_UESR);
-    announcement.setSendStatus(CommonConstant.HAS_SEND);
-    announcement.setSendTime(new Date());
-    announcement.setMsgCategory(setMsgCategory);
-    announcement.setDelFlag(String.valueOf(CommonConstant.DEL_FLAG_0));
-    announcement.setBusId(busId);
-    announcement.setBusType(busType);
-    announcement.setOpenType(SysAnnmentTypeEnum.getByType(busType).getOpenType());
-    announcement.setOpenPage(SysAnnmentTypeEnum.getByType(busType).getOpenPage());
-    sysAnnouncementMapper.insert(announcement);
-    // 2. Insert user announcement read-mark records
-    String userId = toUser;
-    String[] userIds = userId.split(",");
-    String anntId = announcement.getId();
-    for (int i = 0; i < userIds.length; i++) {
-      if (oConvertUtils.isNotEmpty(userIds[i])) {
-        SysUser sysUser = userMapper.getUserByName(userIds[i]);
-        if (sysUser == null) {
-          continue;
-        }
-        // NOTE: cleaned - SysAnnouncementSend announcementSend = new SysAnnouncementSend();
-        announcementSend.setAnntId(anntId);
-        announcementSend.setUserId(sysUser.getId());
-        announcementSend.setReadFlag(CommonConstant.NO_READ_FLAG);
-        sysAnnouncementSendMapper.insert(announcementSend);
-        JSONObject obj = new JSONObject();
-        obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
-        obj.put(WebsocketConst.MSG_USER_ID, sysUser.getId());
-        obj.put(WebsocketConst.MSG_ID, announcement.getId());
-        obj.put(WebsocketConst.MSG_TXT, announcement.getTitile());
-        webSocket.sendMessage(sysUser.getId(), obj.toJSONString());
-      }
-    }
   }
 
   /**

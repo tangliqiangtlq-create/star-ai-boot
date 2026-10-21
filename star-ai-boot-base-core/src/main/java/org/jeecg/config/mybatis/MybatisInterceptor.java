@@ -49,7 +49,7 @@ public class MybatisInterceptor implements Interceptor {
           if ("createBy".equals(field.getName()) || "createdBy".equals(field.getName())) {
             Object localCreateBy = ReflectionAccessUtil.getFieldValue(field, parameter);
             if ((localCreateBy == null || "".equals(localCreateBy)) && sysUser != null) {
-              ReflectionAccessUtil.setFieldValue(field, parameter, sysUser.getUsername());
+              ReflectionAccessUtil.setFieldValue(field, parameter, sysUser.getId());
             }
           }
           if ("createTime".equals(field.getName()) || "createdTime".equals(field.getName())) {
@@ -63,7 +63,7 @@ public class MybatisInterceptor implements Interceptor {
           if ("updateBy".equals(field.getName()) || "updatedBy".equals(field.getName())) {
             Object localUpdateBy = ReflectionAccessUtil.getFieldValue(field, parameter);
             if ((localUpdateBy == null || "".equals(localUpdateBy)) && sysUser != null) {
-              ReflectionAccessUtil.setFieldValue(field, parameter, sysUser.getUsername());
+              ReflectionAccessUtil.setFieldValue(field, parameter, sysUser.getId());
             }
           }
           if ("updateTime".equals(field.getName()) || "updatedTime".equals(field.getName())) {
@@ -119,7 +119,7 @@ public class MybatisInterceptor implements Interceptor {
         try {
           if (("updateBy".equals(field.getName()) || "updatedBy".equals(field.getName()))
               && sysUser != null) {
-            ReflectionAccessUtil.setFieldValue(field, parameter, sysUser.getUsername());
+            ReflectionAccessUtil.setFieldValue(field, parameter, sysUser.getId());
           }
           if ("updateTime".equals(field.getName()) || "updatedTime".equals(field.getName())) {
             ReflectionAccessUtil.setFieldValue(field, parameter, new Date());

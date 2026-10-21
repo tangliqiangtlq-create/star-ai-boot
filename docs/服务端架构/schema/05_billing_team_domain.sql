@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 数据库建表脚本
 -- Part 05 · 计费订阅域 + 团队管理域 ai_* (9 张表)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -86,8 +86,8 @@ CREATE TABLE `ai_price_rule` (
   KEY `idx_priority_enabled` (`priority`, `enabled`),
   KEY `idx_channel` (`channel_id`),
   KEY `idx_enabled` (`enabled`),
-  KEY `idx_billing_unit` (`billing_unit`),                                                              COMMENT '按计费单位扫描',
-  CONSTRAINT `chk_billing_unit` CHECK (`billing_unit` IN ('per_second','per_call','per_token','per_pixel_mp','per_character','per_minute'))
+  KEY `idx_billing_unit` (`billing_unit`)                                                              COMMENT '按计费单位扫描',
+  CHECK (`billing_unit` IN ('per_second','per_call','per_token','per_pixel_mp','per_character','per_minute'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='多维度定价规则 (v1.2 支持 6 种计费单位: per_second/per_call/per_token/per_pixel_mp/per_character/per_minute; 一张表覆盖所有维度, 支持阶梯价/促销折扣/时间窗/分辨率/宽高比/参考图数量/音频输入/风格差异定价)';
 
@@ -137,9 +137,9 @@ CREATE TABLE `ai_billing` (
   KEY `idx_user` (`user_id`),
   KEY `idx_team` (`team_id`),
   KEY `idx_status` (`wallet_status`),
-  KEY `idx_balance_threshold` (`credits_balance`, `threshold_warn`),                          COMMENT '余额告警扫描',
-  CONSTRAINT `chk_wallet_status` CHECK (`wallet_status` IN (0,1,2)),
-  CONSTRAINT `chk_currency` CHECK (`currency` = 'CREDITS')
+  KEY `idx_balance_threshold` (`credits_balance`, `threshold_warn`)                          COMMENT '余额告警扫描',
+  CHECK (`wallet_status` IN (0,1,2)),
+  CHECK (`currency` = 'CREDITS')
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='账户钱包 (核心资金账户, user_id 或 team_id 二选一, 高并发余额更新用 version CAS + 3 次重试)';
 
@@ -189,8 +189,8 @@ CREATE TABLE `ai_usage_record` (
   KEY `idx_occurred_at` (`occurred_at`),
   KEY `idx_model` (`model_id`),
   KEY `idx_related` (`related_transaction_no`),
-  CONSTRAINT `chk_direction` CHECK (`direction` IN (-1, 1)),
-  CONSTRAINT `chk_transaction_type` CHECK (`transaction_type` IN (1,2,3,4,5,6,7,8,9))
+  CHECK (`direction` IN (-1, 1)),
+  CHECK (`transaction_type` IN (1,2,3,4,5,6,7,8,9))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='计费流水 (不可变账本, 所有余额变动必写一条, 双向关联具体业务对象, 对账源数据)';
 
@@ -241,11 +241,11 @@ CREATE TABLE `ai_recharge` (
   KEY `idx_tenant_user` (`tenant_id`, `user_id`),
   KEY `idx_tenant_team` (`tenant_id`, `team_id`),
   KEY `idx_payment_status` (`payment_status`),
-  KEY `idx_payment_expire` (`payment_expire_time`),                                         COMMENT '定时关单扫描',
+  KEY `idx_payment_expire` (`payment_expire_time`)                                         COMMENT '定时关单扫描',
   KEY `idx_invoice_status` (`invoice_status`),
   KEY `idx_create_time` (`create_time`),
-  CONSTRAINT `chk_pay_method` CHECK (`pay_method` IN (1,2,3,4,5,6,7,8)),
-  CONSTRAINT `chk_payment_status` CHECK (`payment_status` IN (0,1,2,3,4,5))
+  CHECK (`pay_method` IN (1,2,3,4,5,6,7,8)),
+  CHECK (`payment_status` IN (0,1,2,3,4,5))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='充值订单 (第三方回调唯一约束天然幂等, 原始回调 JSON 完整保留审计)';
 
@@ -295,8 +295,8 @@ CREATE TABLE `ai_subscription` (
   KEY `idx_next_renew` (`next_renew_time`),
   KEY `idx_grace_until` (`grace_until`),
   KEY `idx_trial_end` (`trial_end_time`),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4,5)),
-  CONSTRAINT `chk_billing_cycle` CHECK (`billing_cycle` IN (1,2,3,4))
+  CHECK (`status` IN (0,1,2,3,4,5)),
+  CHECK (`billing_cycle` IN (1,2,3,4))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='订阅套餐 (支持月/季/年付 + 自动续费 + 宽限期 + 试用 + 到期取消)';
 
@@ -394,8 +394,8 @@ CREATE TABLE `ai_team_member` (
   KEY `idx_status` (`status`),
   KEY `idx_cost_limit` (`cost_limit_per_month`, `cost_used_month`),
   KEY `idx_cost_reset` (`cost_reset_time`),
-  CONSTRAINT `chk_member_role` CHECK (`member_role` IN (1,2,3,4)),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2))
+  CHECK (`member_role` IN (1,2,3,4)),
+  CHECK (`status` IN (0,1,2))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='团队成员 (含双维度预算: 团队总额 + 个人限额, 含代登录开关和审计)';
 
@@ -447,7 +447,7 @@ CREATE TABLE `ai_team_budget_log` (
   PRIMARY KEY (`id`),
   KEY `idx_team_time` (`team_id`, `create_time`),
   KEY `idx_user` (`user_id`),
-  CONSTRAINT `chk_log_type` CHECK (`log_type` IN (1,2,3,4))
+  CHECK (`log_type` IN (1,2,3,4))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='团队预算流水 (月度重置/成员扣费合计/预算调整/告警触发, 审计团队资金动向)';
 
@@ -523,10 +523,10 @@ CREATE TABLE `ai_tenant_billing_summary` (
   `update_time`            DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '最后更新时间',
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_tenant` (`tenant_id`)                                                   COMMENT '一租户一行',
-  KEY `idx_balance_total` (`balance_total`),                                             COMMENT '余额分布统计',
-  KEY `idx_consumed_this_month` (`consumed_this_month`),                                  COMMENT '月消费排行',
+  KEY `idx_balance_total` (`balance_total`)                                             COMMENT '余额分布统计',
+  KEY `idx_consumed_this_month` (`consumed_this_month`)                                  COMMENT '月消费排行',
   KEY `idx_tenant_level` (`tenant_level`),
-  KEY `idx_monthly_reset` (`monthly_reset_time`),                                         COMMENT '月度重置扫描',
+  KEY `idx_monthly_reset` (`monthly_reset_time`)                                         COMMENT '月度重置扫描',
   KEY `idx_data_consistent` (`data_consistent_flag`)                                      COMMENT '数据一致性告警扫描'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='租户级聚合统计 (高频访问, 事件驱动异步更新, 每日全量对账, 解决实时聚合慢的问题)';

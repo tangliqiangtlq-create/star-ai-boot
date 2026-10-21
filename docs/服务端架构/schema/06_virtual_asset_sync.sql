@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 数据库建表脚本
 -- Part 06 · 火山虚拟库同步 ai_asset_virtual_sync (Q8 采纳, 轻量同步元数据表)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -53,11 +53,11 @@ CREATE TABLE `ai_asset_virtual_sync` (
   UNIQUE KEY `uk_provider_external` (`provider_code`, `external_asset_id`, `del_flag`),
   KEY `idx_local_asset` (`local_asset_id`),
   KEY `idx_sync_status` (`sync_status`),
-  KEY `idx_retry` (`next_sync_retry_time`),                                             COMMENT '失败重试扫描',
-  KEY `idx_poll` (`last_poll_time`),                                                    COMMENT '轮询扫描',
+  KEY `idx_retry` (`next_sync_retry_time`)                                             COMMENT '失败重试扫描',
+  KEY `idx_poll` (`last_poll_time`)                                                    COMMENT '轮询扫描',
   KEY `idx_tenant_provider` (`tenant_id`, `provider_code`),
   KEY `idx_provider_status` (`provider_code`, `sync_status`),
-  CONSTRAINT `chk_sync_status` CHECK (`sync_status` IN (0,1,2,3,4,5))
+  CHECK (`sync_status` IN (0,1,2,3,4,5))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='外部虚拟素材同步遥控器 (轻量元数据表, 跟踪火山/OpenAI/Minimax 等外部素材的生命周期: 同步/更新/下架/重试)';
 

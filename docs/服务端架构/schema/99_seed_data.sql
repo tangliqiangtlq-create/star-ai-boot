@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 种子数据脚本
 -- Part 99 · 初始种子数据 (平台级配置, 非必须但建议执行)
 -- 执行时机: 所有建表脚本执行完毕后, 立即执行此脚本
@@ -33,7 +33,7 @@ VALUES (
   1,                                          -- user_type = 1 (平台管理员)
   1,                                          -- status = 1 (正常)
   0,                                          -- mfa_enabled = 0 (生产环境建议开启)
-  NULL, NULL, 0
+  NULL, DEFAULT, 0
 );
 
 
@@ -233,7 +233,7 @@ INSERT INTO `ai_channel` (`id`, `tenant_id`, `provider_id`, `channel_name`, `cha
 -- 8. 平台级默认定价规则 (ai_price_rule, tenant_id=0)
 -- =============================================================================
 -- 兜底价优先级最低 (priority=0), 具体模型价 priority 更大
-INSERT INTO `ai_price_rule` (`id`, `tenant_id`, `model_id`, `task_type`, `resolution`, `duration_bucket_start_sec`, `duration_bucket_end_sec`, `unit_price_per_sec`, `resolution_coef`, `min_price`, `rule_code`, `rule_name`, `priority`, `enabled`, `revision`) VALUES
+INSERT INTO `ai_price_rule` (`id`, `tenant_id`, `model_id`, `task_type`, `resolution`, `duration_bucket_start_sec`, `duration_bucket_end_sec`, `price_value`, `resolution_coef`, `min_price`, `rule_code`, `rule_name`, `priority`, `enabled`, `revision`) VALUES
 -- 万相 2.6 T2V (最高优先级, 最热门模型)
 (40001, 0, 22001, 't2v', '720p',  NULL, NULL, 0.5000, 0.8000, NULL, 'PRD-WAN26-T2V-720P',  '万相2.6 文生视频 720p',   100, 1, 0),
 (40002, 0, 22001, 't2v', '1080p', NULL, NULL, 0.8000, 1.0000, NULL, 'PRD-WAN26-T2V-1080P', '万相2.6 文生视频 1080p',  100, 1, 0),
@@ -295,16 +295,16 @@ INSERT INTO stream_subscription_plan
 ('trial_7d',   '7天免费试用', 7,   0.00, 'CNY', 'cn', 0.8000, 0.5000, 'play_duration', 10, 0.3000,   0,   0, 1,   0, 1, 4, 1, 0, 1),
 
 -- ======== 新加坡 sg (东南亚市场, 价格略高) ========
-('monthly',    'Monthly',   30, SGD 12.90, 'CNY', 'sg', 0.9000, 0.7000, 'play_duration', 10, 0.3000, 100,  0, 2,  30, 1, 1, 0, 0, 1),
-('quarterly',  'Quarterly', 90, SGD 34.90, 'CNY', 'sg', 0.9000, 0.7000, 'play_duration', 10, 0.3000, 300,  0, 3,  45, 1, 2, 0, 0, 1),
-('yearly',     'Yearly',    365, SGD 118.00, 'CNY', 'sg', 0.9000, 0.7000, 'play_duration', 10, 0.3000, 1200, 200, 5, -1, 1, 3, 0, 0, 1),
-('trial_7d',   '7-Day Trial', 7,   0.00, 'CNY', 'sg', 0.8000, 0.5000, 'play_duration', 10, 0.3000,   0,   0, 1,   0, 1, 4, 1, 0, 1),
+('monthly',    'Monthly',   30, 12.90, 'SGD', 'sg', 0.9000, 0.7000, 'play_duration', 10, 0.3000, 100,  0, 2,  30, 1, 1, 0, 0, 1),
+('quarterly',  'Quarterly', 90, 34.90, 'SGD', 'sg', 0.9000, 0.7000, 'play_duration', 10, 0.3000, 300,  0, 3,  45, 1, 2, 0, 0, 1),
+('yearly',     'Yearly',    365, 118.00, 'SGD', 'sg', 0.9000, 0.7000, 'play_duration', 10, 0.3000, 1200, 200, 5, -1, 1, 3, 0, 0, 1),
+('trial_7d',   '7-Day Trial', 7,   0.00, 'SGD', 'sg', 0.8000, 0.5000, 'play_duration', 10, 0.3000,   0,   0, 1,   0, 1, 4, 1, 0, 1),
 
 -- ======== 美国 us (竞争激烈, 价格最高 + 权益最优) ========
-('monthly',    'Monthly',   30, USD 9.99,  'CNY', 'us', 0.8500, 0.7500, 'hybrid',        15, 0.4000, 150,  0, 3,  45, 1, 1, 0, 0, 1),
-('quarterly',  'Quarterly', 90, USD 24.99, 'CNY', 'us', 0.8500, 0.7500, 'hybrid',        15, 0.4000, 400,  0, 4,  60, 1, 2, 0, 0, 1),
-('yearly',     'Yearly',    365, USD 79.99, 'CNY', 'us', 0.8500, 0.7500, 'hybrid',        15, 0.4000, 1500, 300, 6, -1, 1, 3, 0, 0, 1),
-('trial_7d',   '7-Day Trial', 7,   0.00, 'CNY', 'us', 0.8000, 0.5000, 'hybrid',        15, 0.4000,    0,   0, 2,  15, 1, 4, 1, 0, 1);
+('monthly',    'Monthly',   30, 9.99,  'USD', 'us', 0.8500, 0.7500, 'hybrid',        15, 0.4000, 150,  0, 3,  45, 1, 1, 0, 0, 1),
+('quarterly',  'Quarterly', 90, 24.99, 'USD', 'us', 0.8500, 0.7500, 'hybrid',        15, 0.4000, 400,  0, 4,  60, 1, 2, 0, 0, 1),
+('yearly',     'Yearly',    365, 79.99, 'USD', 'us', 0.8500, 0.7500, 'hybrid',        15, 0.4000, 1500, 300, 6, -1, 1, 3, 0, 0, 1),
+('trial_7d',   '7-Day Trial', 7,   0.00, 'USD', 'us', 0.8000, 0.5000, 'hybrid',        15, 0.4000,    0,   0, 2,  15, 1, 4, 1, 0, 1);
 
 -- ========== 平台级配置 (stream_platform_config, 按 Region) ==========
 INSERT INTO stream_platform_config (config_key, config_value, config_type, region, description, tenant_id, update_by) VALUES

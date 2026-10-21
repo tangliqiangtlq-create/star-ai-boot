@@ -1,6 +1,7 @@
 package org.jeecg.modules.system.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -32,25 +33,30 @@ public class SysUserMfa {
   private String mfaType;
 
   @ApiModelProperty(value = "Encrypted secret")
+  @TableField(exist = false)
   private String secretEnc;
 
   @ApiModelProperty(value = "Enabled: 1-yes 0-no")
   private Integer enabled;
 
   @ApiModelProperty(value = "Verified time")
+  @TableField(exist = false)
   @JsonFormat(timezone = "UTC", pattern = "yyyy-MM-dd HH:mm:ss")
   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private java.util.Date verifiedAt;
 
   @ApiModelProperty(value = "Last used time")
+  @TableField(exist = false)
   @JsonFormat(timezone = "UTC", pattern = "yyyy-MM-dd HH:mm:ss")
   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private java.util.Date lastUsedAt;
 
   @ApiModelProperty(value = "Consecutive failure count")
+  @TableField(exist = false)
   private Integer failCount;
 
   @ApiModelProperty(value = "Locked until time")
+  @TableField(exist = false)
   @JsonFormat(timezone = "UTC", pattern = "yyyy-MM-dd HH:mm:ss")
   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private java.util.Date lockedUntil;
@@ -59,6 +65,7 @@ public class SysUserMfa {
   private Integer delFlag;
 
   @ApiModelProperty(value = "Created by")
+  @TableField(exist = false)
   private String createBy;
 
   @ApiModelProperty(value = "Create time")
@@ -67,6 +74,7 @@ public class SysUserMfa {
   private java.util.Date createTime;
 
   @ApiModelProperty(value = "Updated by")
+  @TableField(exist = false)
   private String updateBy;
 
   @ApiModelProperty(value = "Update time")

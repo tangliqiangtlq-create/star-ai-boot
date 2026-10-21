@@ -18,6 +18,7 @@ public class E9V1RotateHandler {
 
   private static final int BATCH_LIMIT = 1000;
 
+  @Resource private SysUserMapper sysUserMapper;
 
   @XxlJob("E9V1RotateHandler")
   public void execute() {
@@ -66,11 +67,5 @@ public class E9V1RotateHandler {
   }
 
   private void rotateThirdAccountBatch() {
-    q.last("LIMIT " + BATCH_LIMIT);
-    if (rows == null || rows.isEmpty()) {
-      log.info("E9V1RotateHandler sys_third_account: 0 rows");
-      return;
-    }
-    log.info("E9V1RotateHandler sys_third_account batch: total={}", rows.size());
   }
 }

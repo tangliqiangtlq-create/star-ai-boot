@@ -49,7 +49,7 @@ public class StreamBrowseController {
     }
 
     @ApiOperation("视频详情 + 播放权限判断")
-    @GetMapping("/{{id}}")
+    @GetMapping("/{id}")
     public Result<StreamVideo> detail(@PathVariable Long id) {
         StreamVideo video = videoService.getById(id);
         if (video == null || !"published".equals(video.getPublishStatus())) {

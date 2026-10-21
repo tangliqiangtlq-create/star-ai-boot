@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 数据库建表脚本
 -- Part 07 · 空间与协作域 (演进预留, 2 张表)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -127,11 +127,11 @@ CREATE TABLE `ai_space` (
   KEY `idx_space_type` (`space_type`),
   KEY `idx_team` (`team_id`),
   KEY `idx_tenant_status` (`tenant_id`, `status`),
-  KEY `idx_budget_limit` (`budget_limit_month`, `budget_used_month`),                                    COMMENT '预算告警扫描',
-  KEY `idx_migration_status` (`migration_status`),                                                      COMMENT '迁移进度扫描',
+  KEY `idx_budget_limit` (`budget_limit_month`, `budget_used_month`)                                    COMMENT '预算告警扫描',
+  KEY `idx_migration_status` (`migration_status`)                                                      COMMENT '迁移进度扫描',
 
-  CONSTRAINT `chk_space_type` CHECK (`space_type` IN (1,2)),
-  CONSTRAINT `chk_billing_priority` CHECK (`billing_priority` IS NULL OR `billing_priority` IN (0,1,2,3))
+  CHECK (`space_type` IN (1,2)),
+  CHECK (`billing_priority` IS NULL OR `billing_priority` IN (0,1,2,3))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='空间统一实体 (演进预留, 统一承载个人空间 type=1 和团队空间 type=2, 业务表通过 space_id+space_type 双轨挂靠, 未来逐步取代 user_id/team_id 分散归属)';
 
@@ -209,14 +209,14 @@ CREATE TABLE `ai_space_collaborator` (
   KEY `idx_user` (`user_id`),
   KEY `idx_space_type` (`space_id`, `space_type`),
   KEY `idx_status` (`status`),
-  KEY `idx_expire` (`expire_time`),                                                   COMMENT '到期协作者清理扫描',
+  KEY `idx_expire` (`expire_time`)                                                   COMMENT '到期协作者清理扫描',
   KEY `idx_tenant_user` (`tenant_id`, `user_id`),
   KEY `idx_collab_role` (`collab_role`),
   KEY `idx_owner` (`is_owner`),
 
-  CONSTRAINT `chk_collab_role` CHECK (`collab_role` IN (1,2,3,4,5)),
-  CONSTRAINT `chk_space_type` CHECK (`space_type` IN (1,2)),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3))
+  CHECK (`collab_role` IN (1,2,3,4,5)),
+  CHECK (`space_type` IN (1,2)),
+  CHECK (`status` IN (0,1,2,3))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='空间协作成员 (跨空间协作 + 外部协作者 + 个人空间临时邀请, 与 ai_team_member 双轨并存; 正式团队成员两边都有记录, 外部/跨空间协作者只有此表记录)';
 

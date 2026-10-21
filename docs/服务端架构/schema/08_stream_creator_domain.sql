@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · 18+ 视频付费分润平台 · 数据库建表脚本
 -- Part 08 · 视频消费域 + 创作者中心域 (creator_* / stream_*) · 共 13 张表
 -- Part 11 · 用户年龄验证扩展 (sys_user_age_verification)
@@ -40,7 +40,7 @@ CREATE TABLE `sys_user_age_verification` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_id` (`user_id`),
   KEY `idx_verified` (`age_verified`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='用户年龄验证 (注册强制 18+ 合规核心)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户年龄验证 (注册强制 18+ 合规核心)';
 
 
 -- -----------------------------------------------------------------------------
@@ -109,7 +109,7 @@ CREATE TABLE `creator_account` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_id` (`user_id`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='创作者账户';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='创作者账户';
 
 -- 8.2 视频分类（平台维护）
 DROP TABLE IF EXISTS `creator_video_category`;
@@ -125,7 +125,7 @@ CREATE TABLE `creator_video_category` (
   `update_time`         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   `del_flag`            TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='视频分类';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频分类';
 
 -- 8.3 视频标签
 DROP TABLE IF EXISTS `creator_video_tag`;
@@ -137,7 +137,7 @@ CREATE TABLE `creator_video_tag` (
   `create_time`         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='视频标签';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频标签';
 
 
 -- -----------------------------------------------------------------------------
@@ -227,7 +227,7 @@ CREATE TABLE `stream_video` (
   KEY `idx_category` (`category_id`),
   KEY `idx_auto_review` (`auto_review_status`),
   KEY `idx_price_type` (`price_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='视频资源 (核心)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频资源 (核心)';
 
 -- 8.5 视频-标签 多对多
 DROP TABLE IF EXISTS `stream_video_tag_rel`;
@@ -238,7 +238,7 @@ CREATE TABLE `stream_video_tag_rel` (
   `create_time`         DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_video_tag` (`video_id`, `tag_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='视频标签关联';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频标签关联';
 
 -- 8.5 剧集 (Series: 短剧/连续剧, 每部剧含若干集, 支持剧集级打包解锁)
 -- 视频层级 (三级, 均可独立定价):
@@ -296,7 +296,7 @@ CREATE TABLE `stream_video_collection` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_series_season` (`series_code`, `season`, `tenant_id`),
   KEY `idx_creator` (`creator_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='剧集 Series (短剧/连续剧, 创作者自己定价支持剧集级打包解锁)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='剧集 Series (短剧/连续剧, 创作者自己定价支持剧集级打包解锁)';
 
 DROP TABLE IF EXISTS `stream_video_collection_rel`;
 CREATE TABLE `stream_video_collection_rel` (
@@ -307,7 +307,7 @@ CREATE TABLE `stream_video_collection_rel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_collection_episode` (`collection_id`, `episode_number`),
   UNIQUE KEY `uk_video` (`video_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='剧集-视频关联 (每集只属于一部剧集)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='剧集-视频关联 (每集只属于一部剧集)';
 
 -- 8.7 观看权限
 -- 权限获取路径 (5 种消费模式, 按权限判断优先级从上到下):
@@ -345,7 +345,7 @@ CREATE TABLE `stream_video_purchase` (
   UNIQUE KEY `uk_user_collection` (`user_id`, `collection_id`),
   KEY `idx_user` (`user_id`, `unlock_scope`),
   KEY `idx_payment_order` (`payment_order_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='视频观看权限 (已购/解锁记录)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='视频观看权限 (已购/解锁记录)';
 
 -- 8.8 播放历史
 DROP TABLE IF EXISTS `stream_video_play_history`;
@@ -366,7 +366,7 @@ CREATE TABLE `stream_video_play_history` (
   UNIQUE KEY `uk_user_video` (`user_id`, `video_id`),
   KEY `idx_user_played` (`user_id`, `last_played_at`),
   KEY `idx_member_effective` (`is_member_view`, `is_effective`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='播放历史 (断点续播 + 订阅池贡献埋点)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='播放历史 (断点续播 + 订阅池贡献埋点)';
 
 -- 8.9 点赞收藏
 DROP TABLE IF EXISTS `stream_video_interaction`;
@@ -379,7 +379,7 @@ CREATE TABLE `stream_video_interaction` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_user_video_type` (`user_id`, `video_id`, `interaction_type`),
   KEY `idx_video_type` (`video_id`, `interaction_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='点赞收藏';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='点赞收藏';
 
 -- 8.10 分润收益流水（交易驱动 + 订阅池两种来源）
 DROP TABLE IF EXISTS `stream_revenue_record`;
@@ -405,7 +405,7 @@ CREATE TABLE `stream_revenue_record` (
   KEY `idx_settle_status` (`settle_status`),
   KEY `idx_payment` (`payment_order_no`),
   KEY `idx_source_pool` (`revenue_source`, `pool_batch_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='分润收益流水 (交易驱动 + 订阅池双来源)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='分润收益流水 (交易驱动 + 订阅池双来源)';
 
 -- 8.10.1 创作者全局解锁记录 (v1.2 新增)
 -- 用户付一笔钱解锁某创作者的所有视频 (含未来新发布的)
@@ -428,7 +428,7 @@ CREATE TABLE `stream_creator_unlock` (
   UNIQUE KEY `uk_user_creator` (`user_id`, `creator_id`),
   KEY `idx_creator` (`creator_id`),
   KEY `idx_payment` (`payment_order_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='创作者全局解锁记录 (v1.2 新增)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='创作者全局解锁记录 (v1.2 新增)';
 
 -- 8.11 创作者提现申请
 DROP TABLE IF EXISTS `stream_withdrawal_request`;
@@ -456,7 +456,7 @@ CREATE TABLE `stream_withdrawal_request` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_request_no` (`request_no`),
   KEY `idx_creator_status` (`creator_id`, `status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='创作者提现申请';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='创作者提现申请';
 
 -- 8.12 创作者收益账本（汇总表，加速看板查询）
 DROP TABLE IF EXISTS `stream_creator_earnings`;
@@ -470,6 +470,6 @@ CREATE TABLE `stream_creator_earnings` (
   `last_updated_at`     DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_creator` (`creator_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='创作者收益账本 (汇总表)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='创作者收益账本 (汇总表)';
 
 SET FOREIGN_KEY_CHECKS = 1;

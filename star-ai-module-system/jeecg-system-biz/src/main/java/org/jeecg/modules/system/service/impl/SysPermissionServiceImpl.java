@@ -97,10 +97,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 		this.deletePermRuleByPermId(id);
 		//Delete role authorization table
 		sysRolePermissionMapper.deleteByMap(map);
-		//DeleteDepartmentPermissionTable
-		sysDepartPermissionMapper.deleteByMap(map);
-		//Delete Department role authorization
-		sysDepartRolePermissionMapper.deleteByMap(map);
+		// NOTE: cleaned - sys_depart_permission / sys_depart_role_permission tables removed
 	}
 	
 	/**
@@ -130,10 +127,7 @@ public class SysPermissionServiceImpl extends ServiceImpl<SysPermissionMapper, S
 				this.deletePermRuleByPermId(id);
 				//Delete role authorization table
 				sysRolePermissionMapper.deleteByMap(map);
-				//DeleteDepartmentPermissionTable
-				sysDepartPermissionMapper.deleteByMap(map);
-				//Delete Department role authorization
-				sysDepartRolePermissionMapper.deleteByMap(map);
+				// NOTE: cleaned - sys_depart_permission / sys_depart_role_permission tables removed
 				num = this.count(new LambdaQueryWrapper<SysPermission>().eq(SysPermission::getParentId, id));
 				// If so, recurse
 				if (num > 0) {

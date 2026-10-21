@@ -283,11 +283,13 @@ public class SysUser implements Serializable {
   private Integer depositBankCount;
 
   /** D4 legacy AES MFA deadline after which old ciphers are rejected */
+  @TableField(exist = false)
   @JsonFormat(timezone = "UTC", pattern = "yyyy-MM-dd HH:mm:ss")
   @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   private Date mfaLegacyCutoffAt;
 
   /** D4 0=legacy AES; 1=MFA_MASTER_SECRET AES-GCM */
+  @TableField(exist = false)
   private Integer mfaMasterVersion = 0;
 
   /**

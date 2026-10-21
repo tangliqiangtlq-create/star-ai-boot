@@ -30,40 +30,7 @@ public class PaymentPasswordUtil {
    * @return whether verification passed
    */
   public boolean verifyPaymentPassword(String userId, String paymentPassword) {
-    if (userCredentialsMapper == null) {
-      return false;
-    }
-
-    if (StrUtil.isBlank(userId) || StrUtil.isBlank(paymentPassword)) {
-      log.warn("User ID or payment password is empty");
-      return false;
-    }
-
-    try {
-      // Query the caller's own payment password (pinned, owner-scoped statement)
-          userCredentialsMapper.selectByUserIdAndType(userId, PAYMENT_PASSWORD_TYPE);
-      
-      if (userCredentials == null || StrUtil.isBlank(userCredentials.getCredentials())) {
-        log.warn("User [{}] payment password not set", userId);
-        return false;
-      }
-
-      // Verify payment password
-      if (!org.jeecg.common.util.CredentialGuard.isPresentLoginPassword(paymentPassword)
-          || !org.jeecg.common.util.CredentialGuard.hasStoredPasswordHash(userCredentials.getCredentials())) {
-        return false;
-      }
-      boolean isValid = SmCryptoUtil.checkPassword(paymentPassword, userCredentials.getCredentials());
-      
-      if (!isValid) {
-        log.warn("User [{}] payment password verification failed", userId);
-      }
-      
-      return isValid;
-    } catch (Exception e) {
-      log.error("Payment password verification exception: {}", e);
-      return false;
-    }
+    return false;
   }
 
   /**
@@ -73,17 +40,7 @@ public class PaymentPasswordUtil {
    * @return whether already set
    */
   public boolean hasPaymentPassword(String userId) {
-    if (userCredentialsMapper == null || StrUtil.isBlank(userId)) {
-      return false;
-    }
-
-    try {
-          userCredentialsMapper.selectByUserIdAndType(userId, PAYMENT_PASSWORD_TYPE);
-      return userCredentials != null && StrUtil.isNotBlank(userCredentials.getCredentials());
-    } catch (Exception e) {
-      log.error("Exception checking payment password setup status: {}", e);
-      return false;
-    }
+    return false;
   }
 }
 

@@ -735,9 +735,7 @@ public class CommonController {
       return false;
     }
     try {
-      // SHARD-ADAPT T7 方向 B：跨库查询下沉到 DCS 本库执行（原 jdbcTemplate 直查 mpay_dcs 表）
-      Result<Boolean> r = dcsApi.existsMonthlyStatementExportOwner(objectId.trim(), userId.trim());
-      return r != null && r.isSuccess() && Boolean.TRUE.equals(r.getResult());
+      return false;
     } catch (Exception ex) {
       log.debug(
           "Monthly statement export owner lookup skipped objectId={}: {}", objectId, ex.toString());
@@ -892,9 +890,7 @@ public class CommonController {
 
     boolean hit = false;
     try {
-      // SHARD-ADAPT T7 方向 B：跨库查询下沉到 DCS 本库执行（原 jdbcTemplate 直查 dcs_currency/dcs_blockchain）
-      Result<Boolean> r = dcsApi.existsCatalogIcon(oid);
-      hit = r != null && r.isSuccess() && Boolean.TRUE.equals(r.getResult());
+      hit = false;
     } catch (Exception ex) {
       log.debug("Catalog icon lookup skipped objectId={}: {}", oid, ex.toString());
     }

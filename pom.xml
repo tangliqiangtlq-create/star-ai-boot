@@ -1627,7 +1627,7 @@
               <version>${lombok.version}</version>
             </path>
           </annotationProcessorPaths>
-        </configuration>
+          </configuration>
       </plugin>
       <!--Surefire: Skip unit tests by default-->
       <plugin>

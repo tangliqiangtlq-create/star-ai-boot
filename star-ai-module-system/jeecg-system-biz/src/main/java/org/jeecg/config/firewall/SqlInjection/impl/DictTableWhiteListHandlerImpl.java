@@ -44,8 +44,8 @@ public class DictTableWhiteListHandlerImpl implements IDictTableWhiteListHandler
 
 
     @Autowired
+    private JeecgBaseConfig jeecgBaseConfig;
 
-    
     /**
      * Initialize whiteTablesRuleMap Method
      */
@@ -53,12 +53,6 @@ public class DictTableWhiteListHandlerImpl implements IDictTableWhiteListHandler
         // In dev mode, query database each time to bypass cache
         if (this.isDev()) {
             DictTableWhiteListHandlerImpl.whiteTablesRuleMap.clear();
-        }
-        // If map is empty, query from database
-        if (DictTableWhiteListHandlerImpl.whiteTablesRuleMap.isEmpty()) {
-            Map<String, String> ruleMap = sysTableWhiteListService.getAllConfigMap();
-            log.info("Table dictionary whitelist initialization completed: {}", ruleMap);
-            DictTableWhiteListHandlerImpl.whiteTablesRuleMap.putAll(ruleMap);
         }
     }
 
@@ -209,13 +203,6 @@ public class DictTableWhiteListHandlerImpl implements IDictTableWhiteListHandler
      * @param allowFieldStr
      */
     private void autoAddWhiteList(String tableName, String allowFieldStr) {
-        try {
-            DictTableWhiteListHandlerImpl.whiteTablesRuleMap.put(tableName, entity.getFieldName());
-            log.warn("Table \"{}\" failed validation, and current mode is dev, whitelist data has been auto-added to database. Query field: {}", tableName, allowFieldStr);
-        } catch (Exception e) {
-            log.error("Table \"{}\" failed validation, and current mode is dev, but auto-add whitelist data to database failed, please troubleshoot and retry.", tableName, e);
-            this.throwException();
-        }
     }
 
     /**

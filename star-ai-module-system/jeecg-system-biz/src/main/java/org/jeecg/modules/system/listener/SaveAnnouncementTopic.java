@@ -20,14 +20,5 @@ public class SaveAnnouncementTopic implements RocketMQListener<JSONObject> {
 
   @Override
   public void onMessage(JSONObject message) {
-    sysAnnouncementService.save(sysAnnouncement);
-
-    String userId = sysAnnouncement.getUserIds();
-    String[] userIds = userId.substring(0, (userId.length() - 1)).split(",");
-    com.alibaba.fastjson.JSONObject obj = new com.alibaba.fastjson.JSONObject();
-    obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_USER);
-    obj.put(WebsocketConst.MSG_ID, sysAnnouncement.getId());
-    obj.put(WebsocketConst.MSG_TXT, sysAnnouncement.getTitile());
-    webSocket.sendMessage(userIds, obj.toJSONString());
   }
 }

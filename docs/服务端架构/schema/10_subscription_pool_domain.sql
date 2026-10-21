@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · 18+ 视频付费分润平台 · 数据库建表脚本
 -- Part 10 · 会员订阅池域 (stream_subscription_* + stream_creator_monthly_contribution)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -113,7 +113,7 @@ CREATE TABLE `stream_subscription_plan` (
   `revision`              INT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_plan_code_region` (`plan_code`, `region`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='会员订阅方案 (平台配置)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='会员订阅方案 (平台配置)';
 
 -- 10.2 用户订阅记录（谁、什么时候、什么方案、是否自动续费）
 DROP TABLE IF EXISTS `stream_user_subscription`;
@@ -149,7 +149,7 @@ CREATE TABLE `stream_user_subscription` (
   KEY `idx_expires` (`status`, `expires_at`),
   KEY `idx_payment` (`payment_order_no`),
   KEY `idx_user_plan` (`user_id`, `plan_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='用户订阅记录';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户订阅记录';
 
 -- 10.3 每月订阅总池（XXL-JOB subscription.pool.aggregate 产出的核心对账锚点）
 DROP TABLE IF EXISTS `stream_subscription_pool`;
@@ -204,7 +204,7 @@ CREATE TABLE `stream_subscription_pool` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_pool_month_region` (`pool_month`, `region`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='每月订阅分润总池 (核心对账锚点)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='每月订阅分润总池 (核心对账锚点)';
 
 -- 10.4 每月创作者订阅贡献度（池子 → 创作者的分润计算明细）
 DROP TABLE IF EXISTS `stream_creator_monthly_contribution`;
@@ -242,7 +242,7 @@ CREATE TABLE `stream_creator_monthly_contribution` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_pool_creator` (`pool_id`, `creator_id`),
   KEY `idx_creator_month` (`creator_id`, `pool_month`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='每月创作者订阅贡献度';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='每月创作者订阅贡献度';
 
 -- 10.5 平台级配置 (全局免费集数等平台方统一配置, v1.2 新增)
 -- 为什么不用 sys_dict? 因为 sys_dict 是 JeecgBoot 通用字典, 这里是 stream 业务域专属配置
@@ -260,7 +260,7 @@ CREATE TABLE `stream_platform_config` (
   `tenant_id`             BIGINT UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_key_region` (`config_key`, `region`, `tenant_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='stream 业务域平台级配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='stream 业务域平台级配置';
 
 -- ======== 初始配置数据 (平台方上线时写入) ========
 -- INSERT INTO stream_platform_config (config_key, config_value, config_type, region, description) VALUES

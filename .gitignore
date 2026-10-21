@@ -23,3 +23,8 @@ tmp/
 *.tmp
 .vscode/*
 !.vscode/extensions.json
+
+# Secrets / local env (D1 keys, ramp override, etc.)
+.env
+.env.*
+!.env.example

@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 数据库建表脚本
 -- Part 02 · AI 供应商域 ai_* (4 张表)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -54,7 +54,7 @@ CREATE TABLE `ai_provider` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_provider_code` (`provider_code`, `del_flag`)                           COMMENT '供应商编码全局唯一',
   KEY `idx_status` (`status`),
-  CONSTRAINT `chk_auth_type` CHECK (`auth_type` IN (0,1,2,3))
+  CHECK (`auth_type` IN (0,1,2,3))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='AI 供应商 (平台级只读配置, 由系统管理员维护, 租户不可修改)';
 
@@ -128,8 +128,8 @@ CREATE TABLE `ai_model` (
   KEY `idx_category` (`model_category`),
   KEY `idx_task_type` (`task_type`),
   KEY `idx_status` (`status`),
-  CONSTRAINT `chk_model_category` CHECK (`model_category` IN ('text','image','video','audio','embedding')),
-  CONSTRAINT `chk_task_type` CHECK (`task_type` IN ('t2v','i2v','t2i','i2i','kf2v','inpainting','upscale','subtitle_erase','tts'))
+  CHECK (`model_category` IN ('text','image','video','audio','embedding')),
+  CHECK (`task_type` IN ('t2v','i2v','t2i','i2i','kf2v','inpainting','upscale','subtitle_erase','tts'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='AI 模型 (平台级只读配置, 包含所有 AI 厂商的完整模型元数据)';
 
@@ -188,14 +188,14 @@ CREATE TABLE `ai_channel` (
   `del_flag`               TINYINT          NOT NULL DEFAULT 0                                    COMMENT '逻辑删除标记',
   `revision`               INT UNSIGNED     NOT NULL DEFAULT 0                                    COMMENT '乐观锁版本号',
   PRIMARY KEY (`id`),
-  KEY `idx_tenant_provider` (`tenant_id`, `provider_id`),                             COMMENT '租户查询某供应商下的所有通道',
+  KEY `idx_tenant_provider` (`tenant_id`, `provider_id`)                             COMMENT '租户查询某供应商下的所有通道',
   KEY `idx_provider` (`provider_id`),
   KEY `idx_health` (`health_status`),
-  KEY `idx_tenant_enabled` (`tenant_id`, `enabled`, `health_status`),                   COMMENT '路由选择时快速过滤: 启用+健康+属于我的租户或平台',
-  KEY `idx_quota_reset` (`quota_reset_time`),                                          COMMENT '定时任务扫描重置配额',
-  KEY `idx_expire` (`expire_time`),                                                    COMMENT '定时任务扫描凭证过期提醒',
+  KEY `idx_tenant_enabled` (`tenant_id`, `enabled`, `health_status`)                   COMMENT '路由选择时快速过滤: 启用+健康+属于我的租户或平台',
+  KEY `idx_quota_reset` (`quota_reset_time`)                                          COMMENT '定时任务扫描重置配额',
+  KEY `idx_expire` (`expire_time`)                                                    COMMENT '定时任务扫描凭证过期提醒',
   KEY `idx_monthly_cost_limit` (`monthly_cost_limit`, `monthly_cost_used`)              COMMENT '月度控费扫描',
-  CONSTRAINT `chk_health_status` CHECK (`health_status` IN (0,1,2,3))
+  CHECK (`health_status` IN (0,1,2,3))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='AI 通道 (存放加密的 AK/SK 凭证, 每个租户可为同一 Provider 配置多通道实现主备和负载均衡, 最敏感表)';
 

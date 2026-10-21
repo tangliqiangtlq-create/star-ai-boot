@@ -3,6 +3,12 @@ server:
   forward-headers-strategy: native
 
 spring:
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - com.baomidou.mybatisplus.autoconfigure.DdlAutoConfiguration
+      - com.alibaba.druid.spring.boot3.autoconfigure.DruidDataSourceAutoConfigure
   application:
     name: star-ai-module-creator
   cloud:
@@ -12,7 +18,7 @@ spring:
       config:
         server-addr: ${NACOS_ADDR:127.0.0.1:8848}
         file-extension: yaml
-        namespace: ${NACOS_NAMESPACE:public}
+        namespace: ${NACOS_NAMESPACE:}
         group: ${NACOS_GROUP:DEFAULT_GROUP}
   config:
     import:
@@ -38,6 +44,10 @@ spring:
       host: ${REDIS_HOST:127.0.0.1}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+
+jeecg:
+  redisson:
+    address: ${REDIS_HOST:127.0.0.1}:${REDIS_PORT:6379}
 
 mybatis-plus:
   configuration:

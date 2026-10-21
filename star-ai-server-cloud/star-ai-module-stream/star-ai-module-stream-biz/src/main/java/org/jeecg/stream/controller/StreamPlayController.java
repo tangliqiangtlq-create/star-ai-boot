@@ -23,7 +23,7 @@ public class StreamPlayController {
     private final IStreamPlayService playService;
 
     @ApiOperation("完整播放 HLS master URL (需付费权限)")
-    @GetMapping("/{{videoId}}")
+    @GetMapping("/{videoId}")
     public Result<String> playFull(@PathVariable Long videoId) {
         Long userId = StpUtil.getLoginIdAsLong();
         PlayPermission pp = permissionService.check(userId, videoId);
@@ -35,7 +35,7 @@ public class StreamPlayController {
     }
 
     @ApiOperation("试看 HLS (preview_sec 秒) — 未付费也能看")
-    @GetMapping("/{{videoId}}/preview")
+    @GetMapping("/{videoId}/preview")
     public Result<String> playPreview(@PathVariable Long videoId) {
         StreamVideo video = videoService.getById(videoId);
         if (video == null || video.getPreviewSec() == null || video.getPreviewSec() <= 0) {
@@ -46,7 +46,7 @@ public class StreamPlayController {
     }
 
     @ApiOperation("播放结束埋点")
-    @PostMapping("/{{videoId}}/end")
+    @PostMapping("/{videoId}/end")
     public Result<String> playEnd(@PathVariable Long videoId, @RequestBody(required = false) Integer durationSec) {
         Long userId = StpUtil.getLoginIdAsLong();
         playService.recordPlayEnd(userId, videoId, durationSec);

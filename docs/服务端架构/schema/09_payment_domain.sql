@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · 18+ 视频付费分润平台 · 数据库建表脚本
 -- Part 09 · 支付公共服务域 (ai_payment_*) · 共 4 张表
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -67,7 +67,7 @@ CREATE TABLE `ai_payment_order` (
   KEY `idx_channel_trade` (`channel_type`, `channel_trade_no`),
   KEY `idx_expires` (`status`, `expires_at`),
   KEY `idx_region` (`region`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='支付订单 (公共服务)';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付订单 (公共服务)';
 
 
 -- -----------------------------------------------------------------------------
@@ -106,7 +106,7 @@ CREATE TABLE `ai_payment_channel` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_channel_region` (`channel_code`, `region`),
   KEY `idx_enabled` (`enabled`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='支付渠道配置';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='支付渠道配置';
 
 
 -- -----------------------------------------------------------------------------
@@ -153,7 +153,7 @@ CREATE TABLE `ai_payment_refund` (
   KEY `idx_payment` (`payment_order_no`),
   KEY `idx_business` (`business_type`, `business_order_no`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='退款单';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='退款单';
 
 
 -- -----------------------------------------------------------------------------
@@ -194,7 +194,7 @@ CREATE TABLE `ai_payment_settlement` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_settle_key` (`settle_date`, `channel_type`, `region`, `currency`),
   KEY `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4_unicode_ci COMMENT='每日对账';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='每日对账';
 
 
 SET FOREIGN_KEY_CHECKS = 1;

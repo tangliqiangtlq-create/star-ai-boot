@@ -30,7 +30,7 @@ public class StreamPurchaseController {
     }
 
     @ApiOperation("查询订单状态")
-    @GetMapping("/{{orderNo}}")
+    @GetMapping("/{orderNo}")
     public Result<StreamVideoPurchase> getOrder(@PathVariable String orderNo) {
         return Result.OK(purchaseService.getByOrderNo(orderNo));
     }

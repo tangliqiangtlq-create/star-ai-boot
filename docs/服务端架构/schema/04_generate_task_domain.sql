@@ -61,7 +61,7 @@ CREATE TABLE `ai_generation_batch` (
   KEY `idx_status` (`status`),
   KEY `idx_status_progress` (`status`, `progress_percent`),
   KEY `idx_create_time` (`create_time`),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4,5))
+  CHECK (`status` IN (0,1,2,3,4,5))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='视频生成批量任务 (一个 batch 下挂 N 个 generation, 支持进度页/取消整体/并发控制/失败重试策略)';
 
@@ -159,23 +159,14 @@ CREATE TABLE `ai_generation` (
   KEY `idx_model` (`model_id`),
   KEY `idx_task` (`task_id`),
   KEY `idx_status` (`status`),
-  KEY `idx_external_task_id` (`external_task_id`),                                          COMMENT '厂商回调时反查',
-  KEY `idx_billing_status` (`billing_status`),                                              COMMENT '账单对账扫描',
+  KEY `idx_external_task_id` (`external_task_id`)                                          COMMENT '厂商回调时反查',
+  KEY `idx_billing_status` (`billing_status`)                                              COMMENT '账单对账扫描',
   KEY `idx_create_time` (`create_time`),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4,5,6)),
-  CONSTRAINT `chk_generation_type` CHECK (`generation_type` IN (1,2,3,4)),
-  CONSTRAINT `chk_task_type` CHECK (`task_type` IN ('t2v','i2v','t2i','i2i','kf2v','inpainting','upscale','subtitle_erase','tts'))
+  CHECK (`status` IN (0,1,2,3,4,5,6)),
+  CHECK (`generation_type` IN (1,2,3,4)),
+  CHECK (`task_type` IN ('t2v','i2v','t2i','i2i','kf2v','inpainting','upscale','subtitle_erase','tts'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='视频生成记录 (核心业务主表, MySQL RANGE COLUMNS 按月分区, DROP PARTITION 秒级清理历史数据)'
-  PARTITION BY RANGE COLUMNS (`create_time`) (
-    PARTITION p2026_10 VALUES LESS THAN ('2026-11-01'),
-    PARTITION p2026_11 VALUES LESS THAN ('2026-12-01'),
-    PARTITION p2026_12 VALUES LESS THAN ('2027-01-01'),
-    PARTITION p2027_01 VALUES LESS THAN ('2027-02-01'),
-    PARTITION p2027_02 VALUES LESS THAN ('2027-03-01'),
-    PARTITION p2027_03 VALUES LESS THAN ('2027-04-01'),
-    PARTITION p_future  VALUES LESS THAN MAXVALUE
-  );
+  COMMENT='视频生成记录 (核心业务主表)';
 -- 后续分区: ALTER TABLE ai_generation REORGANIZE PARTITION p_future INTO (PARTITION p2027_04 VALUES LESS THAN ('2027-05-01'), PARTITION p_future VALUES LESS THAN MAXVALUE);
 
 
@@ -211,7 +202,7 @@ CREATE TABLE `ai_generation_file` (
   KEY `idx_generation` (`generation_id`),
   KEY `idx_tenant_generation` (`tenant_id`, `generation_id`),
   KEY `idx_file_type` (`file_type`),
-  CONSTRAINT `chk_file_type` CHECK (`file_type` IN ('video','preview','thumbnail','subtitle','audio','log','original','intermediate'))
+  CHECK (`file_type` IN ('video','preview','thumbnail','subtitle','audio','log','original','intermediate'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='视频生成多文件 (一条 generation 可产出多个文件: 主视频/预览/缩略图/字幕/音轨等)';
 
@@ -285,10 +276,10 @@ CREATE TABLE `ai_task` (
   KEY `idx_tenant_status` (`tenant_id`, `status`),
   KEY `idx_queue_status` (`queue_name`, `status`),
   KEY `idx_next_retry` (`next_retry_time`)                                               COMMENT '调度器扫描待重试任务',
-  KEY `idx_timeout_at` (`timeout_at`),                                                     COMMENT '超时扫描',
+  KEY `idx_timeout_at` (`timeout_at`)                                                     COMMENT '超时扫描',
   KEY `idx_ref` (`ref_type`, `ref_id`),
   KEY `idx_status` (`status`),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4,5,6))
+  CHECK (`status` IN (0,1,2,3,4,5,6))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='异步任务持久化副本 (Bull 队列只存轻量 {task_id}, 真实 payload/状态全在 MySQL, Redis 重启后补偿扫描可恢复; 是整个任务系统的 Source of Truth)';
 
@@ -315,7 +306,7 @@ CREATE TABLE `ai_task_step` (
   PRIMARY KEY (`id`),
   KEY `idx_task` (`task_id`),
   KEY `idx_task_index` (`task_id`, `step_index`),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4))
+  CHECK (`status` IN (0,1,2,3,4))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='异步任务分步 (复杂任务拆多步, 每步一行, 让用户/运维看到"现在卡在哪一步")';
 

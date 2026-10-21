@@ -250,7 +250,95 @@ public class SysUserController {
   @AutoLog("Get users under tenant")
   @RequestMapping(value = "/list", method = RequestMethod.POST)
   public Result<IPage<SysUser>> queryPageList(
-    return null;
+      SysUser user,
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      @RequestParam(required = false, name = "roleCode") String roleCode,
+      @RequestParam(required = false, name = "roleId") String roleId,
+      @RequestParam(value = "label", required = false) String label,
+      @RequestParam(required = false) String searchText,
+      HttpServletRequest req) {
+    QueryWrapper<SysUser> queryWrapper = QueryGenerator.initQueryWrapper(user, req.getParameterMap());
+
+    String userId = currentBizUserResolver.getBizOwnerUserId();
+    if (!RoleConfigUtil.isAdmin(commonAPI)) {
+      queryWrapper.eq("inviter_id", userId);
+    }
+
+    if (StrUtil.isNotBlank(roleCode)) {
+      String[] roleCodes = roleCode.split(",");
+      List<String> validRoleCodes = new ArrayList<>();
+      for (String code : roleCodes) {
+        if (StrUtil.isNotBlank(code)) {
+          validRoleCodes.add(code.trim());
+        }
+      }
+      if (!validRoleCodes.isEmpty()) {
+        if (validRoleCodes.size() == 1) {
+          queryWrapper.apply(
+              true,
+              "id in (select user_id from sys_user_role where role_id = (select id from sys_role where role_code = {0}))",
+              validRoleCodes.get(0));
+        } else {
+          List<SysRole> matchedRoles =
+              sysRoleService.list(
+                  new LambdaQueryWrapper<SysRole>().in(SysRole::getRoleCode, validRoleCodes));
+          List<String> matchedRoleIds =
+              matchedRoles == null
+                  ? Collections.emptyList()
+                  : matchedRoles.stream()
+                      .map(SysRole::getId)
+                      .filter(StrUtil::isNotBlank)
+                      .collect(Collectors.toList());
+          if (matchedRoleIds.isEmpty()) {
+            queryWrapper.eq("id", "0");
+          } else {
+            List<String> userIds = sysUserService.getUserIdsByRoleIds(matchedRoleIds);
+            if (userIds == null || userIds.isEmpty()) {
+              queryWrapper.eq("id", "0");
+            } else {
+              queryWrapper.in("id", userIds);
+            }
+          }
+        }
+      }
+    }
+
+    if (StrUtil.isNotBlank(roleId)) {
+      String[] roleIds = roleId.split(",");
+      List<String> validRoleIds = new ArrayList<>();
+      for (String id : roleIds) {
+        if (StrUtil.isNotBlank(id)) {
+          validRoleIds.add(id.trim());
+        }
+      }
+      if (!validRoleIds.isEmpty()) {
+        if (validRoleIds.size() == 1) {
+          queryWrapper.apply(
+              true, "id in (select user_id from sys_user_role where role_id = {0})",
+              validRoleIds.get(0));
+        } else {
+          List<String> userIds = sysUserService.getUserIdsByRoleIds(validRoleIds);
+          if (userIds == null || userIds.isEmpty()) {
+            queryWrapper.eq("id", "0");
+          } else {
+            queryWrapper.in("id", userIds);
+          }
+        }
+      }
+    }
+
+    if (StrUtil.isNotBlank(label)) {
+      queryWrapper.apply(
+          true, "id in (select user_id from sys_user_label where label_code = {0})", label);
+    }
+
+    if (StrUtil.isNotBlank(searchText)) {
+      queryWrapper.and(
+          wrapper -> wrapper.like("username", searchText).or().like("realname", searchText));
+    }
+
+    return sysUserService.queryPageList(req, queryWrapper, pageSize, pageNo);
   }
 
   /**
@@ -271,7 +359,118 @@ public class SysUserController {
   @AutoLog("GetSystemUserData")
   @RequestMapping(value = "/listAll", method = RequestMethod.POST)
   public Result<IPage<SysUser>> queryAllPageList(
-    return null;
+      SysUser user,
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      @RequestParam(required = false) String selectRoleId,
+      @RequestParam(value = "label", required = false) String label,
+      @RequestParam(required = false) String selectRoleCode,
+      @RequestParam(value = "hasDepositBank", required = false) String hasDepositBank,
+      @RequestParam(value = "hasBeneficiary", required = false) String hasBeneficiary,
+      @RequestParam(required = false) String searchText,
+      HttpServletRequest req,
+      HttpServletResponse response) {
+    QueryWrapper<SysUser> queryWrapper = QueryGenerator.initQueryWrapper(user, req.getParameterMap());
+
+    String userId = currentBizUserResolver.getBizOwnerUserId();
+    if (!RoleConfigUtil.isAdmin(commonAPI)) {
+      queryWrapper.eq("inviter_id", userId);
+    }
+
+    if (StrUtil.isNotBlank(selectRoleId)) {
+      queryWrapper.apply(
+          true, "id in (select user_id from sys_user_role where role_id = {0})", selectRoleId);
+    }
+
+    if (StrUtil.isNotBlank(selectRoleCode)) {
+      List<String> roleCodes =
+          Arrays.stream(selectRoleCode.split(","))
+              .map(String::trim)
+              .filter(s -> !s.isEmpty())
+              .collect(Collectors.toList());
+      if (!roleCodes.isEmpty()) {
+        String placeholders =
+            java.util.stream.IntStream.range(0, roleCodes.size())
+                .mapToObj(i -> "{" + i + "}")
+                .collect(Collectors.joining(", "));
+        queryWrapper.apply(
+            true,
+            "id in (select user_id from sys_user_role where role_id in (select id from sys_role where role_code in ("
+                + placeholders
+                + ")))",
+            roleCodes.toArray());
+      }
+    }
+
+    if (StrUtil.isNotBlank(label)) {
+      queryWrapper.apply(
+          true, "id in (select user_id from sys_user_label where label_code = {0})", label);
+    }
+
+    if (StrUtil.isNotBlank(hasDepositBank)) {
+      List<String> allIds = Collections.emptyList();
+      if (dcsApi != null) {
+        try {
+          Result<List<String>> r = dcsApi.listDepositBankUserIds();
+          if (r != null && r.isSuccess() && r.getResult() != null) {
+            allIds = r.getResult();
+          }
+        } catch (Exception e) {
+          log.warn("listDepositBankUserIds remote call failed", e);
+        }
+      }
+      if ("1".equals(hasDepositBank)) {
+        if (CollUtil.isEmpty(allIds)) {
+          queryWrapper.eq("id", "0");
+        } else {
+          queryWrapper.in("id", allIds);
+        }
+      } else if ("0".equals(hasDepositBank)) {
+        if (!CollUtil.isEmpty(allIds)) {
+          queryWrapper.notIn("id", allIds);
+        }
+      }
+    }
+
+    if (StrUtil.isNotBlank(hasBeneficiary)) {
+      List<String> allIds = Collections.emptyList();
+      if (dcsApi != null) {
+        try {
+          Result<List<String>> r = dcsApi.listActiveBeneficiarySenderIds();
+          if (r != null && r.isSuccess() && r.getResult() != null) {
+            allIds = r.getResult();
+          }
+        } catch (Exception e) {
+          log.warn("listActiveBeneficiarySenderIds remote call failed", e);
+        }
+      }
+      if ("1".equals(hasBeneficiary)) {
+        if (CollUtil.isEmpty(allIds)) {
+          queryWrapper.eq("id", "0");
+        } else {
+          queryWrapper.in("id", allIds);
+        }
+      } else if ("0".equals(hasBeneficiary)) {
+        if (!CollUtil.isEmpty(allIds)) {
+          queryWrapper.notIn("id", allIds);
+        }
+      }
+    }
+
+    if (StrUtil.isNotBlank(searchText)) {
+      queryWrapper.and(
+          wrapper ->
+              wrapper.like("username", searchText).or().like("realname", searchText).or().like("email", searchText));
+    }
+
+    Result<IPage<SysUser>> pageResult = sysUserService.queryPageList(req, queryWrapper, pageSize, pageNo);
+    if (response != null && pageResult != null && pageResult.isSuccess()) {
+      String etag = ETagResponseSupport.computeWeakEtag(pageResult.getResult());
+      if (ETagResponseSupport.applyEtagOrNotModified(req, response, etag)) {
+        pageResult.setResult(null);
+      }
+    }
+    return pageResult;
   }
 
   @SaCheckPermission("system:user:add")
@@ -533,8 +732,21 @@ public class SysUserController {
   @AutoLog("QueryUserRole")
   @RequestMapping(value = "/queryUserRole", method = RequestMethod.POST)
   public Result<List<String>> queryUserRole(
-    // NOTE: UserInviteCode/UserLabel 已清理
-    return java.util.Collections.emptyList();
+      @RequestParam(name = "userid", required = true) String userid) {
+    Result<List<String>> result = new Result<>();
+    List<String> list = new ArrayList<String>();
+    List<SysUserRole> userRole = sysUserRoleService.list(
+        new QueryWrapper<SysUserRole>().lambda().eq(SysUserRole::getUserId, userid));
+    if (userRole == null || userRole.size() <= 0) {
+      result.error500(I18nUtil.getMessage("sysUser.userRoleInfoNotFound"));
+    } else {
+      for (SysUserRole sysUserRole : userRole) {
+        list.add(sysUserRole.getRoleId());
+      }
+      result.setSuccess(true);
+      result.setResult(list);
+    }
+    return result;
   }
 
   /**
@@ -646,8 +858,26 @@ public class SysUserController {
   @SaCheckPermission("system:user:userDepartList")
   @AutoLog("Query data associated with specified user and department")
   public Result<List<DepartIdModel>> getUserDepartsList(
-    // NOTE: UserInviteCode/UserLabel 已清理
-    return java.util.Collections.emptyList();
+      @RequestParam(name = "userId", required = true) String userId) {
+    Result<List<DepartIdModel>> result = new Result<>();
+    try {
+      List<DepartIdModel> depIdModelList = this.sysUserDepartService.queryDepartIdsOfUser(userId);
+      if (depIdModelList != null && depIdModelList.size() > 0) {
+        result.setSuccess(true);
+        result.setMessage(I18nUtil.getMessage("sysUser.findSuccess"));
+        result.setResult(depIdModelList);
+      } else {
+        result.setSuccess(false);
+        result.setMessage(I18nUtil.getMessage("sysUser.findFailed"));
+      }
+      return result;
+    } catch (Exception e) {
+      log.error("operation failed", e);
+      result.setSuccess(false);
+      result.setMessage(
+          I18nUtil.getMessage("sysUser.findException", new Object[] { e.getMessage() }));
+      return result;
+    }
   }
 
   /**
@@ -677,8 +907,34 @@ public class SysUserController {
   @SaCheckPermission("system:user:queryUserByDepId")
   @AutoLog("ByDepartmentidQueryUserInfo")
   public Result<List<SysUser>> queryUserByDepId(
-    // NOTE: UserInviteCode/UserLabel 已清理
-    return java.util.Collections.emptyList();
+      @RequestParam(name = "id", required = true) String id,
+      @RequestParam(name = "realname", required = false) String realname) {
+    Result<List<SysUser>> result = new Result<>();
+    SysDepart sysDepart = sysDepartService.getById(id);
+    List<SysUser> userList = sysUserDepartService.queryUserByDepCode(sysDepart.getOrgCode(), realname);
+
+    // Batch query user departments
+    List<String> userIds = userList.stream().map(SysUser::getId).collect(Collectors.toList());
+    if (userIds != null && userIds.size() > 0) {
+      Map<String, String> useDepNames = sysUserService.getDepNamesByUserIds(userIds);
+      userList.forEach(
+          item -> {
+            item.setOrgCodeTxt(useDepNames.get(item.getId()));
+          });
+    }
+
+    // P0: strip sensitive columns before returning to frontend.
+    userList.forEach(SysUser::clearSensitiveForResponse);
+
+    try {
+      result.setSuccess(true);
+      result.setResult(userList);
+      return result;
+    } catch (Exception e) {
+      log.error("operation failed", e);
+      result.setSuccess(false);
+      return result;
+    }
   }
 
   /**
@@ -692,7 +948,19 @@ public class SysUserController {
   @AutoLog("User selector component - Dedicated paginated query by user account or department")
   @SaCheckPermission("system:user:queryUserComponentData")
   public Result<IPage<SysUser>> queryUserComponentData(
-    return null;
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      @RequestParam(name = "departId", required = false) String departId,
+      @RequestParam(name = "realname", required = false) String realname,
+      @RequestParam(name = "username", required = false) String username,
+      @RequestParam(name = "isMultiTranslate", required = false) String isMultiTranslate,
+      @RequestParam(name = "id", required = false) String id) {
+    // SQL injection guards on user-supplied dims
+    String[] arr = new String[] { departId, realname, username, id };
+    SqlInjectionUtil.filterContent(arr, SymbolConstant.SINGLE_QUOTATION_MARK);
+    IPage<SysUser> pageList = sysUserDepartService.queryDepartUserPageList(
+        departId, username, realname, pageSize, pageNo, id, isMultiTranslate);
+    return Result.OK(pageList);
   }
 
   /**
@@ -847,7 +1115,15 @@ public class SysUserController {
   @SaCheckPermission("system:user:queryByNames")
   @AutoLog("Batch query by id")
   public Result<Collection<SysUser>> queryByNames(
-    return null;
+      @RequestParam(name = "userNames") String userNames) {
+    Result<Collection<SysUser>> result = new Result<>();
+    String[] names = userNames.split(",");
+    QueryWrapper<SysUser> queryWrapper = new QueryWrapper<>();
+    queryWrapper.lambda().in(true, SysUser::getUsername, names);
+    Collection<SysUser> userRole = sysUserService.list(queryWrapper);
+    result.setSuccess(true);
+    result.setResult(userRole);
+    return result;
   }
 
   /** Home page user password reset */
@@ -977,7 +1253,17 @@ public class SysUserController {
   @SaCheckPermission("system:user:userRoleList")
   @AutoLog("QueryUserRole")
   public Result<IPage<SysUser>> userRoleList(
-    return null;
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      HttpServletRequest req) {
+    Result<IPage<SysUser>> result = new Result<IPage<SysUser>>();
+    Page<SysUser> page = new Page<SysUser>(pageNo, pageSize);
+    String roleId = req.getParameter("roleId");
+    String username = req.getParameter("username");
+    IPage<SysUser> pageList = sysUserService.getUserByRoleId(page, roleId, username);
+    result.setSuccess(true);
+    result.setResult(pageList);
+    return result;
   }
 
   /**
@@ -1043,7 +1329,19 @@ public class SysUserController {
   @AutoLog("Delete user relationship for the specified role")
   @RequestMapping(value = "/deleteUserRole", method = RequestMethod.DELETE)
   public Result<SysUserRole> deleteUserRole(
-    return null;
+      @RequestParam(name = "roleId") String roleId,
+      @RequestParam(name = "userId", required = true) String userId) {
+    Result<SysUserRole> result = new Result<SysUserRole>();
+    try {
+      QueryWrapper<SysUserRole> queryWrapper = new QueryWrapper<SysUserRole>();
+      queryWrapper.eq("role_id", roleId).eq("user_id", userId);
+      sysUserRoleService.remove(queryWrapper);
+      result.success(I18nUtil.getMessage("sysUser.deleteSuccess"));
+    } catch (Exception e) {
+      log.error("operation failed", e);
+      result.error500(I18nUtil.getMessage("sysUser.deleteFailed"));
+    }
+    return result;
   }
 
   /**
@@ -1056,7 +1354,19 @@ public class SysUserController {
   @AutoLog("Batch delete user relations for specified roles")
   @RequestMapping(value = "/deleteUserRoleBatch", method = RequestMethod.DELETE)
   public Result<SysUserRole> deleteUserRoleBatch(
-    return null;
+      @RequestParam(name = "roleId") String roleId,
+      @RequestParam(name = "userIds", required = true) String userIds) {
+    Result<SysUserRole> result = new Result<SysUserRole>();
+    try {
+      QueryWrapper<SysUserRole> queryWrapper = new QueryWrapper<SysUserRole>();
+      queryWrapper.eq("role_id", roleId).in("user_id", Arrays.asList(userIds.split(",")));
+      sysUserRoleService.remove(queryWrapper);
+      result.success(I18nUtil.getMessage("sysUser.deleteSuccess"));
+    } catch (Exception e) {
+      log.error("operation failed", e);
+      result.error500(I18nUtil.getMessage("sysUser.deleteFailed"));
+    }
+    return result;
   }
 
   /** Add users to the specified department */
@@ -1093,7 +1403,23 @@ public class SysUserController {
   @AutoLog("Delete user relationship for the specified organization")
   @RequestMapping(value = "/deleteUserInDepart", method = RequestMethod.DELETE)
   public Result<SysUserDepart> deleteUserInDepart(
-    return null;
+      @RequestParam(name = "depId") String depId,
+      @RequestParam(name = "userId", required = true) String userId) {
+    Result<SysUserDepart> result = new Result<SysUserDepart>();
+    try {
+      QueryWrapper<SysUserDepart> queryWrapper = new QueryWrapper<SysUserDepart>();
+      queryWrapper.eq("dep_id", depId).eq("user_id", userId);
+      boolean b = sysUserDepartService.remove(queryWrapper);
+      if (b) {
+        result.success(I18nUtil.getMessage("sysUser.deleteSuccess"));
+      } else {
+        result.error500(I18nUtil.getMessage("sysUser.departUserNoRelation"));
+      }
+    } catch (Exception e) {
+      log.error("operation failed", e);
+      result.error500(I18nUtil.getMessage("sysUser.deleteFailed"));
+    }
+    return result;
   }
 
   /** Batch delete user relations for the specified organization */
@@ -1101,7 +1427,19 @@ public class SysUserController {
   @AutoLog("Batch delete user relations for specified organizations")
   @RequestMapping(value = "/deleteUserInDepartBatch", method = RequestMethod.DELETE)
   public Result<SysUserDepart> deleteUserInDepartBatch(
-    return null;
+      @RequestParam(name = "depId") String depId,
+      @RequestParam(name = "userIds", required = true) String userIds) {
+    Result<SysUserDepart> result = new Result<SysUserDepart>();
+    try {
+      QueryWrapper<SysUserDepart> queryWrapper = new QueryWrapper<SysUserDepart>();
+      queryWrapper.eq("dep_id", depId).in("user_id", Arrays.asList(userIds.split(",")));
+      sysUserDepartService.remove(queryWrapper);
+      result.success(I18nUtil.getMessage("sysUser.deleteSuccess"));
+    } catch (Exception e) {
+      log.error("operation failed", e);
+      result.error500(I18nUtil.getMessage("sysUser.deleteFailed"));
+    }
+    return result;
   }
 
   /**
@@ -1573,8 +1911,42 @@ public class SysUserController {
   @AutoLog("QueryUserInfo")
   @SaCheckPermission("system:user:appQueryUser")
   public Result<List<SysUser>> appQueryUser(
-    // NOTE: UserInviteCode/UserLabel 已清理
-    return java.util.Collections.emptyList();
+      @RequestParam(name = "keyword", required = false) String keyword,
+      @RequestParam(name = "username", required = false) String username,
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      HttpServletRequest request) {
+    Result<List<SysUser>> result = new Result<List<SysUser>>();
+    LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<SysUser>();
+    // External mock-login temp accounts hidden from list
+    queryWrapper.ne(SysUser::getUsername, "_reserve_user_external");
+    // Add username parameter
+    if (oConvertUtils.isNotEmpty(username)) {
+      if (username.contains(",")) {
+        queryWrapper.in(SysUser::getUsername, username.split(","));
+      } else {
+        queryWrapper.eq(SysUser::getUsername, username);
+      }
+    } else if (StringUtils.isNotBlank(keyword)) {
+      queryWrapper.and(
+          i -> i.like(SysUser::getUsername, keyword).or().like(SysUser::getRealname, keyword));
+    }
+
+    Page<SysUser> page = new Page<>(pageNo, pageSize);
+    IPage<SysUser> pageList = this.sysUserService.page(page, queryWrapper);
+    // Batch query user departments
+    List<String> userIds = pageList.getRecords().stream().map(SysUser::getId).collect(Collectors.toList());
+    if (userIds != null && userIds.size() > 0) {
+      Map<String, String> useDepNames = sysUserService.getDepNamesByUserIds(userIds);
+      pageList
+          .getRecords()
+          .forEach(
+              item -> {
+                item.setOrgCodeTxt(useDepNames.get(item.getId()));
+              });
+    }
+    result.setResult(pageList.getRecords());
+    return result;
   }
 
   /**
@@ -1657,7 +2029,16 @@ public class SysUserController {
   @SaCheckPermission("system:user:getUserInformation")
   @AutoLog("GetUserInfo")
   public Result<IPage<SysUser>> getUserInformation(
-    return null;
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      @RequestParam(name = "departId", required = false) String departId,
+      @RequestParam(name = "keyword", required = false) String keyword) {
+    Integer tenantId = null;
+    if (MybatisPlusSaasConfig.OPEN_SYSTEM_TENANT_CONTROL) {
+      tenantId = oConvertUtils.getInt(TenantContext.getTenant(), 0);
+    }
+    IPage<SysUser> pageList = sysUserDepartService.getUserInformation(tenantId, departId, keyword, pageSize, pageNo);
+    return Result.OK(pageList);
   }
 
   /**
@@ -1672,7 +2053,17 @@ public class SysUserController {
   @AutoLog("GetUserInfo")
   @SaCheckPermission("system:user:selectUs1erList")
   public Result<IPage<SysUser>> selectUserList(
-    return null;
+      @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+      @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+      @RequestParam(name = "departId", required = false) String departId,
+      @RequestParam(name = "roleId", required = false) String roleId,
+      @RequestParam(name = "keyword", required = false) String keyword,
+      @RequestParam(name = "excludeUserIdList", required = false) String excludeUserIdList,
+      HttpServletRequest req) {
+    Integer tenantId = null;
+    IPage<SysUser> pageList = sysUserDepartService.getUserInformation(
+        tenantId, departId, roleId, keyword, pageSize, pageNo, excludeUserIdList);
+    return Result.OK(pageList);
   }
 
   /**
@@ -1779,7 +2170,9 @@ public class SysUserController {
   @AutoLog("Search departments and users by keyword")
   @SaCheckPermission("system:user:searchByKeyword")
   public Result<DepartAndUserInfo> searchByKeyword(
-    return null;
+      @RequestParam(name = "keyword", required = false) String keyword) {
+    DepartAndUserInfo info = sysUserService.searchByKeyword(keyword);
+    return Result.ok(info);
   }
 
   @RequestMapping(value = "/sumRegisterCounts", method = RequestMethod.POST)
@@ -2054,12 +2447,22 @@ public class SysUserController {
   @SaCheckPermission("system:user:opsBindAgent")
   @AutoLog("Ops bind or unbind agent")
   public Result opsBindAgent(
+      @RequestParam String userId,
+      @RequestParam(required = false) String inviteCode,
+      @RequestParam(required = false) String inviterId) {
     // NOTE: UserInviteCode/UserLabel 已清理, 方法体 stub
     return Result.error("功能已停用");
   }
 
   private Result<String> resolveOpsInviterId(String inviteCode, String inviterId, Locale locale) {
-    return null;
+    if (StrUtil.isBlank(inviterId)) {
+      return Result.OK(null);
+    }
+    SysUser agent = sysUserService.getById(inviterId);
+    if (agent == null) {
+      return Result.error(I18nUtil.getMessage("sysUser.userNotFound"));
+    }
+    return Result.OK(inviterId);
   }
 
   private List<cn.hutool.json.JSONObject> ensureAgentInviteCodes(String userId) {
@@ -2083,7 +2486,23 @@ public class SysUserController {
   }
 
   private void ensureOpsAccountsOpen(
-    // NOTE: UserInviteCode/UserLabel 已清理 (void)
+      String userId, List<String> heldTypes, List<String> openTypes) {
+    if (StrUtil.isBlank(userId)) {
+      return;
+    }
+    if (dcsApi == null) {
+      log.warn("ensureOpsAccountsOpen skip, dcsApi not injected for shard userId={}", userId);
+      return;
+    }
+    try {
+      Result<Boolean> r = dcsApi.ensureOpsAccountsOpen(userId, heldTypes, openTypes);
+      if (r == null || !r.isSuccess()) {
+        log.warn("ensureOpsAccountsOpen remote call failed userId={} code={} msg={}",
+            userId, r == null ? null : r.getCode(), r == null ? null : r.getMessage());
+      }
+    } catch (Exception e) {
+      log.warn("ensureOpsAccountsOpen remote call exception userId={}", userId, e);
+    }
   }
 
   private List<String> parseOpsAccountTypes(List<String> accountTypes) {
@@ -2102,6 +2521,8 @@ public class SysUserController {
   @AutoLog("Update master agent role")
   @SaCheckPermission("system:user:updateAgentRole")
   public Result updateAgentRole(
+      @ValidDictionary(table = "sys_user", code = "id", text = "id", scope = DictScope.SYSTEM) @RequestParam String userId,
+      @RequestParam boolean openAgentRole) {
     // NOTE: UserInviteCode/UserLabel 已清理, 方法体 stub
     return Result.error("功能已停用");
   }

@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Star AI Boot · AI 生产力平台 · 数据库建表脚本
 -- Part 03 · 内容创作域 ai_* (6 张表)
 -- 版本: v1.0 | MySQL: 8.4.0 | Charset: utf8mb4_unicode_ci
@@ -42,12 +42,12 @@ CREATE TABLE `ai_asset_folder` (
   `update_time`        DATETIME(3)      NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3) COMMENT '最后更新时间',
   `del_flag`           TINYINT          NOT NULL DEFAULT 0                                      COMMENT '逻辑删除标记',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_tenant_parent_name` (`tenant_id`, `parent_id`, `folder_name`, `del_flag`),          COMMENT '同租户同父级下名称唯一',
+  UNIQUE KEY `uk_tenant_parent_name` (`tenant_id`, `parent_id`, `folder_name`, `del_flag`)          COMMENT '同租户同父级下名称唯一',
   KEY `idx_parent` (`parent_id`),
   KEY `idx_tenant_user` (`tenant_id`, `user_id`),
   KEY `idx_library_type` (`library_type`),
   KEY `idx_ancestors` (`ancestor_ids`(255))                                               COMMENT '前缀索引, 查祖先链/子树',
-  CONSTRAINT `chk_library_type` CHECK (`library_type` IN ('character','scene','prop','frameasset','virtual','custom','mixed'))
+  CHECK (`library_type` IN ('character','scene','prop','frameasset','virtual','custom','mixed'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='素材文件夹 (独立表支持多级目录, 角色库/场景库/道具库/抽帧库/虚拟库/通用库 共用此表, 按 library_type 区分)';
 
@@ -114,12 +114,12 @@ CREATE TABLE `ai_asset` (
   KEY `idx_library_type` (`library_type`),
   KEY `idx_asset_type` (`asset_type`),
   KEY `idx_tenant_folder_type` (`tenant_id`, `folder_id`, `asset_type`),
-  KEY `idx_volc_asset_id` (`volc_asset_id`),                                              COMMENT '火山素材关联查找',
-  KEY `idx_placeholder_tag` (`placeholder_tag`),                                           COMMENT 'Prompt 占位符替换时快速查找',
+  KEY `idx_volc_asset_id` (`volc_asset_id`)                                              COMMENT '火山素材关联查找',
+  KEY `idx_placeholder_tag` (`placeholder_tag`)                                           COMMENT 'Prompt 占位符替换时快速查找',
   KEY `idx_status` (`status`),
-  KEY `idx_expire` (`expire_time`),                                                       COMMENT '定时清理临时文件',
+  KEY `idx_expire` (`expire_time`)                                                       COMMENT '定时清理临时文件',
   KEY `idx_checksum` (`checksum_sha256`)                                                  COMMENT '秒传/去重校验',
-  CONSTRAINT `chk_asset_type` CHECK (`asset_type` IN ('image','video','audio','document','template'))
+  CHECK (`asset_type` IN ('image','video','audio','document','template'))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='素材 (通用表, 一张表承载所有类型素材: 角色图/场景图/道具图/抽帧图/视频片段/音频/文件/模板, 按 asset_type + asset_subtype 区分)';
 
@@ -224,8 +224,8 @@ CREATE TABLE `ai_storyboard_project` (
   KEY `idx_team` (`team_id`),
   KEY `idx_script` (`script_id`),
   KEY `idx_status` (`status`),
-  KEY `idx_budget_limit` (`budget_limit`, `budget_used`),                                   COMMENT '预算告警扫描',
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4,5))
+  KEY `idx_budget_limit` (`budget_limit`, `budget_used`)                                   COMMENT '预算告警扫描',
+  CHECK (`status` IN (0,1,2,3,4,5))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='分镜项目 (时间线容器, 一条时间线 = 一个项目, 聚合多个 shot)';
 
@@ -295,7 +295,7 @@ CREATE TABLE `ai_storyboard_shot` (
   `del_flag`           TINYINT          NOT NULL DEFAULT 0                                      COMMENT '逻辑删除标记',
   `revision`           INT UNSIGNED     NOT NULL DEFAULT 0                                      COMMENT '乐观锁版本号',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_project_shot_index` (`project_id`, `shot_index`, `del_flag`),                      COMMENT '同项目内序号唯一',
+  UNIQUE KEY `uk_project_shot_index` (`project_id`, `shot_index`, `del_flag`)                      COMMENT '同项目内序号唯一',
   KEY `idx_tenant_project` (`tenant_id`, `project_id`),
   KEY `idx_project` (`project_id`),
   KEY `idx_script` (`script_id`),
@@ -304,7 +304,7 @@ CREATE TABLE `ai_storyboard_shot` (
   KEY `idx_model` (`model_id`),
   KEY `idx_status` (`status`),
   KEY `idx_budget` (`cost_estimate`, `cost_actual`),
-  CONSTRAINT `chk_status` CHECK (`status` IN (0,1,2,3,4,5,6))
+  CHECK (`status` IN (0,1,2,3,4,5,6))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='分镜镜头 (内容创作域 + 视频生成域的核心交汇点, 一条记录 = 一个镜头 = 对应一个视频生成任务)';
 
